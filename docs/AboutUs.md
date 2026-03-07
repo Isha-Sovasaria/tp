@@ -37,24 +37,14 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 * Role: Developer
 * Responsibilities: Testing
 
-### Johnny Doe
+### Ashutosh Menon Rajeev
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/poaoaooa.png" width="200px">
 
-[[github](http://github.com/johndoe)] [[portfolio](team/johndoe.md)]
-
-* Role: Developer
-* Responsibilities: Data
-
-### Jean Doe
-
-<img src="images/johndoe.png" width="200px">
-
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](https://github.com/poaoaooa)]
 
 * Role: Developer
-* Responsibilities: Dev Ops + Threading
+* Responsibilities: Developer's Guide
 
 ### Ariel Chua
 
