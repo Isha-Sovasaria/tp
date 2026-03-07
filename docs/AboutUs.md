@@ -11,6 +11,15 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
+### Isha Sovasaria
+
+[[github](https://github.com/Isha-Sovasaria)]
+
+
+* Role: Team lead
+
+* Responsibilities:In-charge of Deliverables and Deadlines , Scheduling and tracking , Git expert
+
 ### Chen Guanyou
 
 <img src="images/guanyouu.png" width="200px">
