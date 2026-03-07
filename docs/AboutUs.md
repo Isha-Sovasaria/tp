@@ -11,15 +11,15 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
-### John Doe
+### Isha Sovasaria
 
-<img src="images/johndoe.png" width="200px">
+[[github](https://github.com/Isha-Sovasaria)]
 
-[[homepage](http://www.comp.nus.edu.sg/~damithch)]
-[[github](https://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
 
-* Role: Project Advisor
+* Role: Team lead
+
+* Responsibilities:In-charge of Deliverables and Deadlines , Scheduling and tracking , Git expert
+
 
 ### Jane Doe
 
