@@ -299,8 +299,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Use cases
 
-(For all use cases below, the **TCMS** is the `TA Contact Management System`
-
 **Use case: Delete a person**
 **Actor:** User
 **MSS**
@@ -327,8 +325,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 1. User selects a student.
 2. User requests to view the student’s history.
-3. TCMS retrieves the student’s notes (UC06), attendance (UC5), and participation records (UC07), progress status (UC08).
-4. TCMS displays the historical information.
+3. TeachAssist retrieves the student’s notes (UC06), attendance (UC5), and participation records (UC07), progress status (UC08).
+4. TeachAssist displays the historical information.
 5. User reviews the data.
 6. Use case ends
 
@@ -337,10 +335,10 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 5a. User deletes a particular student history
     * 5a1 User selects a student to delete.
     * 5a2 User enters the delete command.
-    * 5a3 TCMS requests confirmation.
+    * 5a3 TeachAssist requests confirmation.
     * 5a4 User confirms the deletion.
-    * 5a5 TCMS removes the student record.
-    * 5a6 TCMS displays confirmation.
+    * 5a5 TeachAssist removes the student record.
+    * 5a6 TeachAssist displays confirmation.
     * 5a7 Use case ends.
 
 **Use Case: UC10 – View Help Command**
@@ -348,8 +346,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS:**
 
 1. User enters the help command.
-2. TCMS retrieves the list of supported commands.
-3. TCMS displays the command list with brief descriptions.
+2. TeachAssist retrieves the list of supported commands.
+3. TeachAssist displays the command list with brief descriptions.
 4. User reviews the available commands.
 5. Use case ends
 
