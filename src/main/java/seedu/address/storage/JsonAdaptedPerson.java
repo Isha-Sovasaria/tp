@@ -1,11 +1,5 @@
 package seedu.address.storage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -15,8 +9,8 @@ import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.StudentId;
-import seedu.address.model.person.Tele;
 import seedu.address.model.person.TGroup;
+import seedu.address.model.person.Tele;
 
 /**
  * Jackson-friendly version of {@link Person}.
@@ -36,8 +30,11 @@ class JsonAdaptedPerson {
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
      */
     @JsonCreator
-    public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("courseId") String courseId,
-            @JsonProperty("email") String email, @JsonProperty("studentId") String studentId, @JsonProperty("tGroup") String tGroup,
+    public JsonAdaptedPerson(@JsonProperty("name") String name,
+            @JsonProperty("courseId") String courseId,
+            @JsonProperty("email") String email,
+            @JsonProperty("studentId") String studentId,
+            @JsonProperty("tGroup") String tGroup,
             @JsonProperty("tele") String tele) {
         this.name = name;
         this.courseId = courseId;
@@ -74,7 +71,8 @@ class JsonAdaptedPerson {
         final Name modelName = new Name(name);
 
         if (courseId == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, CourseId.class.getSimpleName()));
+            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT,
+                    CourseId.class.getSimpleName()));
         }
         if (!CourseId.isValidCourseId(courseId)) {
             throw new IllegalValueException(CourseId.MESSAGE_CONSTRAINTS);
@@ -82,7 +80,8 @@ class JsonAdaptedPerson {
         final CourseId modelCourseId = new CourseId(courseId);
 
         if (email == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Email.class.getSimpleName()));
+            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT,
+                    Email.class.getSimpleName()));
         }
         if (!Email.isValidEmail(email)) {
             throw new IllegalValueException(Email.MESSAGE_CONSTRAINTS);
@@ -90,7 +89,8 @@ class JsonAdaptedPerson {
         final Email modelEmail = new Email(email);
 
         if (studentId == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, StudentId.class.getSimpleName()));
+            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT,
+                    StudentId.class.getSimpleName()));
         }
         if (!StudentId.isValidStudentId(studentId)) {
             throw new IllegalValueException(StudentId.MESSAGE_CONSTRAINTS);
@@ -98,7 +98,8 @@ class JsonAdaptedPerson {
         final StudentId modelStudentId = new StudentId(studentId);
 
         if (tGroup == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, TGroup.class.getSimpleName()));
+            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT,
+                    TGroup.class.getSimpleName()));
         }
         if (!TGroup.isValidTGroup(tGroup)) {
             throw new IllegalValueException(TGroup.MESSAGE_CONSTRAINTS);
@@ -106,13 +107,15 @@ class JsonAdaptedPerson {
         final TGroup modelTGroup = new TGroup(tGroup);
 
         if (tele == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Tele.class.getSimpleName()));
+            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT,
+                    Tele.class.getSimpleName()));
         }
         if (!Tele.isValidTele(tele)) {
             throw new IllegalValueException(Tele.MESSAGE_CONSTRAINTS);
         }
         final Tele modelTele = new Tele(tele);
-        return new Person(modelName, modelCourseId, modelEmail, modelStudentId, modelTGroup, modelTele);
+        return new Person(modelName, modelCourseId, modelEmail,
+                modelStudentId, modelTGroup, modelTele);
     }
 
 }
