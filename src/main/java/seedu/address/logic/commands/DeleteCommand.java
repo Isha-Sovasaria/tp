@@ -27,6 +27,8 @@ public class DeleteCommand extends Command {
 
     public static final String MESSAGE_DELETE_STUDENT_SUCCESS = "Deleted Student: %1$s";
 
+    public static final String MESSAGE_PERSON_NOT_FOUND_BY_NAME = "No student with the name \"%1$s\" found on the list.";
+
     private final Index targetIndex;
     private final String targetName;
 
@@ -50,21 +52,35 @@ public class DeleteCommand extends Command {
         this.targetName = targetName;
     }
 
-    // no implementation for deleting by name yet
+    /**
+     * Deletes a student from the address book, identified either by the displayed list index
+     * or by an exact full name match in the currently displayed student list.
+     */    
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         List<Person> lastShownList = model.getFilteredPersonList();
 
-        if (targetIndex == null) {
-            throw new CommandException("Deleting by name is not supported yet.");
+        Person studentToDelete;
+
+        if (targetIndex != null) { // select by index
+            if (targetIndex.getZeroBased() >= lastShownList.size()) {
+                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+            }
+            studentToDelete = lastShownList.get(targetIndex.getZeroBased());
+        } else { // select by name
+            if (targetName == null) {
+                throw new CommandException("Please provide a full student name.");
+            }
+            studentToDelete = lastShownList.stream()
+                    .filter(p -> p.getName().fullName.equals(targetName))
+                    .findFirst()
+                    .orElse(null);
+            if (studentToDelete == null) {
+                throw new CommandException(String.format(MESSAGE_PERSON_NOT_FOUND_BY_NAME, targetName));
+            }
         }
 
-        if (targetIndex.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-        }
-
-        Person studentToDelete = lastShownList.get(targetIndex.getZeroBased());
         model.deletePerson(studentToDelete);
         return new CommandResult(String.format(MESSAGE_DELETE_STUDENT_SUCCESS, Messages.format(studentToDelete)));
     }
