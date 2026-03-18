@@ -450,6 +450,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 4. Use case ends.
 
 ### Non-Functional Requirements
+1. Performance
+    * The system should respond to user commands within 1 second under normal usage.
 
 2. Portability
     * The system should run on Windows, macOS, and Linux environments supporting Java.
