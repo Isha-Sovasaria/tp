@@ -15,17 +15,17 @@ import seedu.address.model.person.Tele;
 public class PersonBuilder {
 
     public static final String DEFAULT_NAME = "Amy Bee";
-    public static final String DEFAULT_STUDENT_ID = "A0123456X";
     public static final String DEFAULT_EMAIL = "amy@gmail.com";
     public static final String DEFAULT_COURSE_ID = "CS2103T";
-    public static final String DEFAULT_TUT_GROUP = "T01";
-    public static final String DEFAULT_TELE = "@amybee";
+    public static final String DEFAULT_STUDENT_ID = "A1234567X";
+    public static final String DEFAULT_TGROUP = "T01";
+    public static final String DEFAULT_TELE = "91234567";
 
     private Name name;
-    private StudentId studentId;
     private Email email;
     private CourseId courseId;
-    private TGroup tutGroup;
+    private StudentId studentId;
+    private TGroup tGroup;
     private Tele tele;
 
     /**
@@ -33,10 +33,10 @@ public class PersonBuilder {
      */
     public PersonBuilder() {
         name = new Name(DEFAULT_NAME);
-        studentId = new StudentId(DEFAULT_STUDENT_ID);
         email = new Email(DEFAULT_EMAIL);
         courseId = new CourseId(DEFAULT_COURSE_ID);
-        tutGroup = new TGroup(DEFAULT_TUT_GROUP);
+        studentId = new StudentId(DEFAULT_STUDENT_ID);
+        tGroup = new TGroup(DEFAULT_TGROUP);
         tele = new Tele(DEFAULT_TELE);
     }
 
@@ -45,18 +45,15 @@ public class PersonBuilder {
      */
     public PersonBuilder(Person personToCopy) {
         name = personToCopy.getName();
-        studentId = personToCopy.getStudentId();
         email = personToCopy.getEmail();
         courseId = personToCopy.getCourseId();
-        tutGroup = personToCopy.getTGroup();
+        studentId = personToCopy.getStudentId();
+        tGroup = personToCopy.getTGroup();
         tele = personToCopy.getTele();
     }
 
     /**
-     * Sets the {@link Name} of the {@code Person} being built.
-     *
-     * @param name The name to set.
-     * @return This {@code PersonBuilder} instance for method chaining.
+     * Sets the {@code Name} of the {@code Person} that we are building.
      */
     public PersonBuilder withName(String name) {
         this.name = new Name(name);
@@ -64,21 +61,7 @@ public class PersonBuilder {
     }
 
     /**
-     * Sets the {@link StudentId} of the {@code Person} being built.
-     *
-     * @param studentId The student ID to set.
-     * @return This {@code PersonBuilder} instance for method chaining.
-     */
-    public PersonBuilder withStudentId(String studentId) {
-        this.studentId = new StudentId(studentId);
-        return this;
-    }
-
-    /**
-     * Sets the {@link Email} of the {@code Person} being built.
-     *
-     * @param email The email to set.
-     * @return This {@code PersonBuilder} instance for method chaining.
+     * Sets the {@code Email} of the {@code Person} that we are building.
      */
     public PersonBuilder withEmail(String email) {
         this.email = new Email(email);
@@ -86,10 +69,7 @@ public class PersonBuilder {
     }
 
     /**
-     * Sets the {@link CourseId} of the {@code Person} being built.
-     *
-     * @param courseId The course ID to set.
-     * @return This {@code PersonBuilder} instance for method chaining.
+     * Sets the {@code CourseId} of the {@code Person} that we are building.
      */
     public PersonBuilder withCourseId(String courseId) {
         this.courseId = new CourseId(courseId);
@@ -97,21 +77,23 @@ public class PersonBuilder {
     }
 
     /**
-     * Sets the {@link TGroup} of the {@code Person} being built.
-     *
-     * @param tutGroup The tutorial group to set.
-     * @return This {@code PersonBuilder} instance for method chaining.
+     * Sets the {@code StudentId} of the {@code Person} that we are building.
      */
-    public PersonBuilder withTutGroup(String tutGroup) {
-        this.tutGroup = new TGroup(tutGroup);
+    public PersonBuilder withStudentId(String studentId) {
+        this.studentId = new StudentId(studentId);
         return this;
     }
 
     /**
-     * Sets the {@link Tele} (Telegram handle) of the {@code Person} being built.
-     *
-     * @param tele The Telegram handle to set.
-     * @return This {@code PersonBuilder} instance for method chaining.
+     * Sets the {@code TGroup} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withTGroup(String tGroup) {
+        this.tGroup = new TGroup(tGroup);
+        return this;
+    }
+
+    /**
+     * Sets the {@code Tele} of the {@code Person} that we are building.
      */
     public PersonBuilder withTele(String tele) {
         this.tele = new Tele(tele);
@@ -119,6 +101,6 @@ public class PersonBuilder {
     }
 
     public Person build() {
-        return new Person(name, courseId, email, studentId, tutGroup, tele);
+        return new Person(name, courseId, email, studentId, tGroup, tele);
     }
 }
