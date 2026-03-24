@@ -20,6 +20,7 @@ public class CommandBox extends UiPart<Region> {
     private static final String FXML = "CommandBox.fxml";
 
     private final CommandExecutor commandExecutor;
+    private final DeleteConfirmationChecker deleteConfirmationChecker;
 
     @FXML
     private TextField commandTextField;
@@ -27,11 +28,21 @@ public class CommandBox extends UiPart<Region> {
     /**
      * Creates a {@code CommandBox} with the given {@code CommandExecutor}.
      */
-    public CommandBox(CommandExecutor commandExecutor) {
+    public CommandBox(CommandExecutor commandExecutor,
+                    DeleteConfirmationChecker deleteConfirmationChecker) {
         super(FXML);
         this.commandExecutor = commandExecutor;
-        // calls #setStyleToDefault() whenever there is a change to the text of the command box.
+        this.deleteConfirmationChecker = deleteConfirmationChecker;
         commandTextField.textProperty().addListener((unused1, unused2, unused3) -> setStyleToDefault());
+    }
+
+    @FunctionalInterface
+    public interface DeleteConfirmationChecker {
+        /**
+         * Returns true if the given command text is a delete command that should show
+         * the confirmation popup.
+         */
+        boolean canShowDeleteConfirmation(String commandText);
     }
 
     /**
@@ -40,13 +51,13 @@ public class CommandBox extends UiPart<Region> {
     @FXML
     private void handleCommandEntered() {
         String commandText = commandTextField.getText();
+
         if (commandText.equals("")) {
             return;
         }
 
         try {
-            // handle UI when delete command is trying to be executed
-            if (isValidDeleteCommand(commandText)) {
+            if (deleteConfirmationChecker.canShowDeleteConfirmation(commandText)) {
                 boolean confirmed = showDeleteConfirmationPopup();
 
                 if (!confirmed) {
@@ -92,27 +103,6 @@ public class CommandBox extends UiPart<Region> {
          * @see seedu.address.logic.Logic#execute(String)
          */
         CommandResult execute(String commandText) throws CommandException, ParseException;
-    }
-
-    /**
-     * Returns true if the given command text is a valid delete command.
-     */
-    private boolean isValidDeleteCommand(String commandText) {
-        String trimmedCommand = commandText.trim();
-
-        if (!(trimmedCommand.equals(DeleteCommand.COMMAND_WORD)
-            || trimmedCommand.startsWith(DeleteCommand.COMMAND_WORD + " "))) {
-            return false;
-        }
-
-        String remainder = trimmedCommand.substring(DeleteCommand.COMMAND_WORD.length()).trim();
-
-        try {
-            new DeleteCommandParser().parse(remainder);
-            return true;
-        } catch (ParseException e) {
-            return false;
-        }
     }
 
     /**

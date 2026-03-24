@@ -3,6 +3,7 @@ package seedu.address.logic;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javafx.collections.ObservableList;
@@ -10,11 +11,14 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
+import seedu.address.logic.parser.DeleteCommandParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.storage.Storage;
 
@@ -84,5 +88,34 @@ public class LogicManager implements Logic {
     @Override
     public void setGuiSettings(GuiSettings guiSettings) {
         model.setGuiSettings(guiSettings);
+    }
+
+    @Override
+    public boolean canShowDeleteConfirmation(String commandText) {
+        String trimmedCommand = commandText.trim();
+
+        if (!(trimmedCommand.equals(DeleteCommand.COMMAND_WORD)
+                || trimmedCommand.startsWith(DeleteCommand.COMMAND_WORD + " "))) {
+            return false;
+        }
+
+        String arguments = trimmedCommand.substring(DeleteCommand.COMMAND_WORD.length()).trim();
+
+        try {
+            DeleteCommand deleteCommand = new DeleteCommandParser().parse(arguments);
+            List<Person> filteredPersonList = model.getFilteredPersonList();
+
+            if (deleteCommand.isDeleteByIndex()) {
+                int zeroBasedIndex = deleteCommand.getTargetIndex().getZeroBased();
+                return zeroBasedIndex >= 0 && zeroBasedIndex < filteredPersonList.size();
+            }
+
+            Name targetName = deleteCommand.getTargetName();
+            return filteredPersonList.stream()
+                    .anyMatch(person -> person.getName().equals(targetName));
+
+        } catch (ParseException e) {
+            return false;
+        }
     }
 }

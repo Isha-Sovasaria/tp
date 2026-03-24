@@ -47,4 +47,10 @@ public interface Logic {
      * Set the user prefs' GUI settings.
      */
     void setGuiSettings(GuiSettings guiSettings);
+
+    /**
+     * Returns true if the given command text is a delete command with valid format
+     * and a target that exists in the current filtered person list.
+     */
+    boolean canShowDeleteConfirmation(String commandText);
 }

@@ -119,4 +119,25 @@ public class DeleteCommand extends Command {
                 .add("targetName", targetName)
                 .toString();
     }
+    
+    /**
+     * Returns true if this delete command targets a person by index.
+     */
+    public boolean isDeleteByIndex() {
+        return targetIndex != null;
+    }
+
+    /**
+     * Returns the target index if this command deletes by index.
+     */
+    public Index getTargetIndex() {
+        return targetIndex;
+    }
+
+    /**
+     * Returns the target name if this command deletes by name.
+     */
+    public Name getTargetName() {
+        return targetName;
+    }
 }
