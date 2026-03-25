@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
 
 /**
@@ -25,18 +26,21 @@ public class Person {
     private final Progress progress;
     private final List<Remark> remarks;
 
+    private final WeeklyAttendanceList weeklyAttendanceList;
+
     /**
      * Every field must be present and not null.
      */
-    public Person(Name name, CourseId courseId, Email email, StudentId studentId, TGroup tGroup,
-        Tele tele, Progress progress) {
-        requireAllNonNull(name, courseId, email, studentId, tGroup, progress);
+    public Person(Name name, CourseId courseId, Email email, StudentId studentId,
+                  TGroup tGroup, Tele tele, WeeklyAttendanceList weeklyAttendanceList, Progress progress) {
+        requireAllNonNull(name, courseId, email, studentId, tGroup, weeklyAttendanceList, progress);
         this.name = name;
         this.courseId = courseId;
         this.email = email;
         this.studentId = studentId;
         this.tGroup = tGroup;
         this.tele = tele;
+        this.weeklyAttendanceList = weeklyAttendanceList;
         this.progress = progress;
         this.remarks = new ArrayList<>();
     }
@@ -47,6 +51,10 @@ public class Person {
 
     public CourseId getCourseId() {
         return courseId;
+    }
+
+    public String getNameAndID() {
+        return name.toString() + " (" + studentId.toString() + ")";
     }
 
     public Email getEmail() {
@@ -65,10 +73,16 @@ public class Person {
         return tele;
     }
 
+    public WeeklyAttendanceList getWeeklyAttendanceList() {
+        return weeklyAttendanceList;
+    }
     public Progress getProgress() {
         return progress;
     }
 
+    public int getAbsenceCount() {
+        return 0; //placeholder for future implementation of absences
+    }
     /**
      * Returns an unmodifiable view of the remarks list.
      */
@@ -89,9 +103,13 @@ public class Person {
      *
      * @return true if the remark was found and removed
      */
-    public boolean deleteRemark(Remark remark) {
-        requireAllNonNull(remark);
-        return remarks.remove(remark);
+    public boolean deleteRemark(Index remarkIndex) {
+        requireAllNonNull(remarkIndex);
+        if (remarkIndex.getZeroBased() >= remarks.size()) {
+            return false;
+        }
+        remarks.remove(remarks.get(remarkIndex.getZeroBased()));
+        return true;
     }
     /**
      * Returns true if both persons have the same name.
@@ -142,6 +160,7 @@ public class Person {
                 .add("studentId", studentId)
                 .add("tGroup", tGroup)
                 .add("tele", tele)
+                .add("weeklyAttendanceList", weeklyAttendanceList)
                 .add("progress", progress)
                 .toString();
     }
