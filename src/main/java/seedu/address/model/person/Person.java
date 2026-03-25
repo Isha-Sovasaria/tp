@@ -26,18 +26,21 @@ public class Person {
     private final Progress progress;
     private final List<Remark> remarks;
 
+    private final WeeklyAttendanceList weeklyAttendanceList;
+
     /**
      * Every field must be present and not null.
      */
-    public Person(Name name, CourseId courseId, Email email, StudentId studentId, TGroup tGroup,
-        Tele tele, Progress progress) {
-        requireAllNonNull(name, courseId, email, studentId, tGroup, progress);
+    public Person(Name name, CourseId courseId, Email email, StudentId studentId,
+                  TGroup tGroup, Tele tele, WeeklyAttendanceList weeklyAttendanceList, Progress progress) {
+        requireAllNonNull(name, courseId, email, studentId, tGroup, weeklyAttendanceList, progress);
         this.name = name;
         this.courseId = courseId;
         this.email = email;
         this.studentId = studentId;
         this.tGroup = tGroup;
         this.tele = tele;
+        this.weeklyAttendanceList = weeklyAttendanceList;
         this.progress = progress;
         this.remarks = new ArrayList<>();
     }
@@ -48,6 +51,10 @@ public class Person {
 
     public CourseId getCourseId() {
         return courseId;
+    }
+
+    public String getNameAndID() {
+        return name.toString() + " (" + studentId.toString() + ")";
     }
 
     public Email getEmail() {
@@ -66,6 +73,9 @@ public class Person {
         return tele;
     }
 
+    public WeeklyAttendanceList getWeeklyAttendanceList() {
+        return weeklyAttendanceList;
+    }
     public Progress getProgress() {
         return progress;
     }
@@ -150,6 +160,7 @@ public class Person {
                 .add("studentId", studentId)
                 .add("tGroup", tGroup)
                 .add("tele", tele)
+                .add("weeklyAttendanceList", weeklyAttendanceList)
                 .add("progress", progress)
                 .toString();
     }
