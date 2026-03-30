@@ -9,8 +9,6 @@ import seedu.address.model.person.StudentId;
 import seedu.address.model.person.TGroup;
 import seedu.address.model.person.Tele;
 import seedu.address.model.person.WeekList;
-import seedu.address.model.person.WeeklyAttendanceList;
-
 
 /**
  * A utility class to help with building Person objects.
@@ -23,13 +21,14 @@ public class PersonBuilder {
     public static final String DEFAULT_STUDENT_ID = "A1234567X";
     public static final String DEFAULT_TGROUP = "T01";
     public static final String DEFAULT_TELE = "91234567";
+
     private Name name;
     private Email email;
     private CourseId courseId;
     private StudentId studentId;
     private TGroup tGroup;
     private Tele tele;
-    private WeeklyAttendanceList weeklyAttendanceList;
+    private WeekList weekList;
     private Progress progress;
 
     /**
@@ -42,12 +41,13 @@ public class PersonBuilder {
         studentId = new StudentId(DEFAULT_STUDENT_ID);
         tGroup = new TGroup(DEFAULT_TGROUP);
         tele = new Tele(DEFAULT_TELE);
-        weeklyAttendanceList = new WeekList();
+        weekList = new WeekList();
         progress = Progress.NOT_SET;
     }
 
     /**
      * Initializes the PersonBuilder with the data of {@code personToCopy}.
+     * @param personToCopy The person object to copy data from.
      */
     public PersonBuilder(Person personToCopy) {
         name = personToCopy.getName();
@@ -56,7 +56,7 @@ public class PersonBuilder {
         studentId = personToCopy.getStudentId();
         tGroup = personToCopy.getTGroup();
         tele = personToCopy.getTele();
-        weeklyAttendanceList = personToCopy.getWeeklyAttendanceList();
+        weekList = personToCopy.getWeekList();
         progress = personToCopy.getProgress();
     }
 
@@ -104,14 +104,15 @@ public class PersonBuilder {
      * Sets the {@code Tele} of the {@code Person} that we are building.
      */
     public PersonBuilder withTele(String tele) {
-        this.tele = new Tele(tele);
+        this.tele = (tele == null) ? null : new Tele(tele);
         return this;
     }
+
     /**
-     * Sets the {@code WeeklyAttendanceList} of the {@code Person} that we are building.
+     * Sets the {@code WeekList} of the {@code Person} that we are building.
      */
-    public PersonBuilder withWeeklyAttendanceList(WeeklyAttendanceList list) {
-        this.weeklyAttendanceList = list;
+    public PersonBuilder withWeekList(WeekList list) {
+        this.weekList = list;
         return this;
     }
 
@@ -123,7 +124,23 @@ public class PersonBuilder {
         return this;
     }
 
+    /**
+     * Sets the {@code WeeklyAttendanceList} to have a specific number of absences.
+     * This is useful for testing filtering by absence count.
+     * @param count The number of weeks to mark as absent (starting from Week 1).
+     */
+    public PersonBuilder withAbsences(int count) {
+        this.weekList = new WeekList();
+        for (int i = 0; i < count; i++) {
+            this.weekList.markWeekAsAbsent(i);
+        }
+        return this;
+    }
+
+    /**
+     * Builds and returns a {@code Person} with the specified details.
+     */
     public Person build() {
-        return new Person(name, courseId, email, studentId, tGroup, tele, weeklyAttendanceList, progress);
+        return new Person(name, courseId, email, studentId, tGroup, tele, weekList, progress);
     }
 }
