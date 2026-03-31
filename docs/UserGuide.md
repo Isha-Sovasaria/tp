@@ -74,7 +74,7 @@ This guide assumes that users are familiar with basic computer operations, such 
 <a name="help"></a>
 ### Viewing help : `help`
 
-Shows a message explaining how to access the help page.
+Shows a message explaining how to access the User Guide and displays the available commands.
 
 ![help message](images/helpMessage.png)
 
@@ -82,6 +82,8 @@ Format:
 ```
 help
 ```
+
+## 
 
 <a name="list"></a>
 ### Listing all students: `list`
@@ -93,6 +95,8 @@ Format:
 list
 ```
 
+##
+
 <a name="add"></a>
 ### Adding a student: `add`
 
@@ -103,10 +107,12 @@ Format:
 add n\NAME id/STUDENT_ID e/EMAIL crs/COURSE_ID tg/TUTORIAL_GROUP [tel/TELEGRAM_USERNAME]
 ```
 
-Example:
+Examples:
 ```
 add n/JOHN DOE id/A0123456X e/johnd@u.nus.edu crs/CS2103T tg/T01 tel/@JOHNDOE
 ```
+
+##
 
 <a name="delete"></a>
 ### Deleting a student : `delete`
@@ -151,6 +157,8 @@ Enter `yes` to proceed with the deletion, or `no` to cancel it.
 `delete 3` followed by `no`
 * No change is made.
 
+##
+
 <a name="clear"></a>
 ### Clears all students : `clear`
 
@@ -160,6 +168,8 @@ Format:
 ```
 clear
 ```
+
+##
 
 <a name="find"></a>
 ### Finding students by name: `find`
@@ -181,6 +191,8 @@ Format: `find KEYWORD [MORE_KEYWORDS]...`
 Examples:
 * `find Jo` returns `John Doe`
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
+
+##
 
 <a name="filter"></a>
 ### Filtering students: `filter`
@@ -212,15 +224,28 @@ Expected output:
 
 Tip: if a filter returns no results, verify you used the correct course ID/tutor group format and valid progress values; run `help` or check the Update Progress section for exact progress tokens.
 
+##
+
 <a name="edit"></a>
 ### Editing a student: `edit`
 
-Edit fields of the students at the given index.
+Edit fields of the students at the given index. At least one field to edit must be provided.
 
 Format:
 ```
 edit INDEX [n/NAME] [id/STUDENT_ID] [e/EMAIL] [crs/COURSE_ID] [tg/TUTORIAL_GROUP] [tel/TELEGRAM_USERNAME]
 ```
+
+Examples:
+* `edit 1 n/John Tan` - Edits the name of the 1st student to `John Tan`.
+* `edit 2 e1384397@u.nus.edu` - Edits the email of the 2nd student.
+* `edit 3 tel/@john_tan` - Edits the Telegram username of the 3rd student.
+* `edit 4 crs/CS2103T tg/T03` - Edits the course ID and tutorial group of the 4th student.
+* `edit 5 n/John Tan e1384397@u.nus.edu` - Edits the name and email of the 5th student.
+* `edit 6 id/A1234567B crs/CS2040S tg/T12` - Edits the student ID, course ID, and tutorial group of the 6th student.
+* `edit 7 n/John Tan id/A1234567B e1384397@u.nus.edu crs/CS2105 tg/T08 tel/@john_tan` - Edits all editable fields of the 7th student.
+
+##
 
 <a name="view"></a>
 ### Viewing a student: `view`
@@ -231,6 +256,8 @@ Format:
 ```
 view INDEX
 ```
+
+##
 
 <a name="mark-attendance"></a>
 ### Marks a students attendance: `markattendance`
@@ -246,6 +273,13 @@ markattendance INDEX week/WEEK_NUMBER sta/STATUS
     * `y` --> Present  --> Green
     * `a` --> Absent   --> Red
     * `n` --> Undetermined   --> Grey
+
+Examples:
+```
+markattendance 1 week/1 sta/y
+```
+
+##
 
 <a name="update-progress"></a>
 ### Updating a student's progress : `updateprogress`
@@ -263,21 +297,13 @@ updateprogress INDEX p/PROGRESS
   * `at_risk`
   * `not_set` (alias: `clear`)
 
-Parsing is case-insensitive (for example `ON_TRACK` and `on_track` are both accepted). Matching is by exact token mapping: the token must match one of the allowed values after normalization — partial or prefix matches (e.g., `on` or `ontrack`) are not supported. Underscores are required where shown.
+* Parsing is case-insensitive (e.g `ON_TRACK` and `on_track` are both accepted)
+* To remove a progress tag use `not_set` or `clear`.
 
-Tip: to remove a progress tag use `not_set` or `clear`.
-
-<a name="progressbyindex"></a>
-**Update Progress by index**
-
-Format:
+Examples:
 ```
-updateprogress INDEX p/PROGRESS
+updateprogress 1 p/on_track
 ```
-
-* Updates the progress of the student at the specified `INDEX` to `PROGRESS`.
-* The index refers to the index number shown in the currently displayed student list.
-* The index **must be a positive integer** 1, 2, 3, …
 
 <a name="progressbydetails"></a>
 **Update progress by student details**
@@ -290,14 +316,11 @@ updateprogress id/STUDENT_ID crs/COURSE_ID tg/TUTORIAL_GROUP p/PROGRESS
 * Updates the progress of the student with the exact details match for `STUDENT_ID`, `COURSE_ID`, and `TUTORIAL_GROUP` to `PROGRESS`.
 
 **Examples**:
-`updateprogress 1 p/on_track`
-* Sets the progress of the 1st student in the currently displayed student list to `on_track`.
+* `updateprogress 1 p/on_track` - Sets the progress of the 1st student in the currently displayed student list to `on_track`.
+* `updateprogress id/A1234567X crs/CS2103T tg/T01 p/needs_attention` - Sets the progress of the student with student ID A1234567X, course CS2103T, and tutorial group T01 to `needs_attention`.
+* `updateprogress 2 p/not_set` - Clears the progress status of the 2nd student in the currently displayed student list.
 
-`updateprogress id/A1234567X crs/CS2103T tg/T01 p/needs_attention`
-* Sets the progress of the student with student ID A1234567X, course CS2103T, and tutorial group T01 to `needs_attention`.
-
-`updateprogress 2 p/not_set`
-* Clears the progress status of the 2nd student in the currently displayed student list.
+##
 
 <a name="remark"></a>
 ### Adding a remark : `remark`
@@ -309,6 +332,13 @@ Format:
 remark INDEX txt/REMARK
 ```
 
+Examples:
+```
+remark 1 txt/Participates actively in class!
+```
+
+##
+
 <a name="unremark"></a>
 ### Removing a remark : `unremark`
 
@@ -318,6 +348,13 @@ Format:
 ```
 unremark INDEX r/REMARK_INDEX
 ```
+
+Examples:
+```
+unremark 1 r/2
+```
+
+##
 
 <div markdown="span" class="alert alert-primary"></div>
 :bulb: **Tip:**<br><br>
