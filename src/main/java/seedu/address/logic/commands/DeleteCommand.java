@@ -43,6 +43,9 @@ public class DeleteCommand extends Command {
     public static final String MESSAGE_UNEXPECTED_TEXT_AFTER_INDEX =
             "Unexpected text after index.";
 
+    public static final String MESSAGE_CONFIRM_DELETE =
+            "Are you sure you want to delete %s? Type 'yes' to confirm or 'no' to cancel.";
+
     private final Index targetIndex;
     private final StudentId targetStudentId;
     private final CourseId targetCourseId;
@@ -78,12 +81,7 @@ public class DeleteCommand extends Command {
         this.targetTGroup = targetTGroup;
     }
 
-    /**
-     * Deletes a person from the address book, identified either by the displayed list index
-     * or by an exact student detail match in the currently displayed list.
-     */
-    @Override
-    public CommandResult execute(Model model) throws CommandException {
+    private Person resolvePersonToDelete(Model model) throws CommandException {
         requireNonNull(model);
         List<Person> lastShownList = model.getFilteredPersonList();
 
@@ -114,8 +112,23 @@ public class DeleteCommand extends Command {
             }
         }
 
-        model.deletePerson(personToDelete);
-        return new CommandResult(String.format(MESSAGE_DELETE_PERSON_SUCCESS, Messages.format(personToDelete)));
+        return personToDelete;
+    }
+
+    /**
+     * Deletes a person from the address book, identified either by the displayed list index
+     * or by an exact student detail match in the currently displayed list.
+     */
+    @Override
+    public CommandResult execute(Model model) throws CommandException {
+        requireNonNull(model);
+
+        Person personToDelete = resolvePersonToDelete(model);
+
+        return CommandResult.withConfirmation(
+                String.format(MESSAGE_CONFIRM_DELETE, personToDelete.getName()),
+                new ConfirmedDeleteCommand(personToDelete)
+        );
     }
 
     @Override
