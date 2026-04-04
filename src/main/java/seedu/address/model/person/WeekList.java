@@ -77,7 +77,7 @@ public class WeekList implements WeeklyAttendanceList {
 
         WeekList otherList = (WeekList) other;
         for (int i = 0; i < NUMBER_OF_WEEKS; i++) {
-            if (this.weeks[i].isAttended() != otherList.weeks[i].isAttended()) {
+            if (this.weeks[i] != otherList.weeks[i]) {
                 return false;
             }
         }

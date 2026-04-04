@@ -59,7 +59,7 @@ public class Week implements WeeklyAttendance {
     @Override
     public void markAsCancelled() throws IllegalStateException {
         if (status == Status.C) {
-            throw new IllegalStateException("Week attendance is already default");
+            throw new IllegalStateException("Week attendance is already cancelled");
         }
         status = Status.C;
     }
