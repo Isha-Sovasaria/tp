@@ -138,7 +138,7 @@
                   <VBox styleClass="command-card" spacing="8.0">
                     <children>
                       <Label text="Command: update_progress" styleClass="command-title" />
-                      <TextField editable="false" styleClass="command-format" text="Format: updateprogress INDEX p/PROGRESS" />
+                      <TextField editable="false" styleClass="command-format" text="Format: updateprogress INDEX p/PROGRESS OR updateprogress id/STUDENT_ID crs/COURSE_ID tg/TGROUP p/PROGRESS" />
                       <Label text="Updates the student's progress. Progress values: 'on_track', 'needs_attention', 'at_risk', 'clear'" wrapText="true" styleClass="command-description" />
                     </children>
                   </VBox>
