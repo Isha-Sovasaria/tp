@@ -14,6 +14,7 @@ import seedu.address.model.person.TGroup;
 import seedu.address.model.person.Tele;
 import seedu.address.model.person.Week;
 
+
 /**
  * Contains utility methods used for parsing strings in the various *Parser classes.
  */
@@ -23,6 +24,8 @@ public class ParserUtil {
     public static final String MESSAGE_INVALID_INDEX = "Index must be a non-zero unsigned integer.";
     public static final String MESSAGE_MISSING_INDEX = "Missing student index.";
     public static final String MESSAGE_TOO_MANY_ARGUMENTS = "Only one student index is allowed.";
+    public static final String MESSAGE_INVALID_PROGRESS =
+            "Invalid progress value. Allowed values are: on_track, needs_attention, at_risk, clear.";
 
     /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it.
@@ -244,8 +247,7 @@ public class ParserUtil {
         case "not_set":
             return Progress.NOT_SET;
         default:
-            throw new ParseException(
-                    "Invalid progress value. Allowed values are: on_track, needs_attention, at_risk, clear.");
+            throw new ParseException(MESSAGE_INVALID_PROGRESS);
         }
     }
 
