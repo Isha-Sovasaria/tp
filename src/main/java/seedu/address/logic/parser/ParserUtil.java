@@ -204,6 +204,7 @@ public class ParserUtil {
 
     /**
      * Parses a {@code String} into a {@code Week.Status}.
+     *
      * Accepts "y" = attended, "a" = absent, "n" = not marked.
      *
      * @param input The input string representing attendance status.
@@ -225,7 +226,6 @@ public class ParserUtil {
             throw new ParseException("Week status must be 'Y' (attended), 'A' (absent), or 'N' (not marked).");
         }
     }
-
     /**
      * Parses a {@code String progress} into a {@code Progress}.
      * Leading and trailing whitespaces will be trimmed.
