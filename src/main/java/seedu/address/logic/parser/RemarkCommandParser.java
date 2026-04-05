@@ -38,6 +38,10 @@ public class RemarkCommandParser implements Parser<RemarkCommand> {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, RemarkCommand.MESSAGE_USAGE));
         }
 
+        if (!Remark.isValidText(remarkText)) {
+            throw new ParseException(Remark.MESSAGE_TEXT_CONSTRAINTS);
+        }
+
         Remark remark = new Remark(remarkText, LocalDate.now());
         return new RemarkCommand(index, remark);
     }
