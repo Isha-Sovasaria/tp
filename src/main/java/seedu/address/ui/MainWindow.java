@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
@@ -35,6 +36,10 @@ public class MainWindow extends UiPart<Stage> {
 
     private static final String MESSAGE_INVALID_CONFIRMATION_RESPONSE =
             "Please type 'yes' to confirm deletion or 'no' to cancel.";
+
+    private static final String WELCOME_MESSAGE = "Welcome to TeachAssist!\n"
+            + "Manage student attendance, progress, and remarks across multiple courses in one place.\n"
+            + "Type 'help' to see the list of available commands.";
 
     private final Logger logger = LogsCenter.getLogger(getClass());
 
@@ -95,6 +100,14 @@ public class MainWindow extends UiPart<Stage> {
 
     private void setAccelerators() {
         setAccelerator(helpMenuItem, KeyCombination.valueOf("F1"));
+        // Fallback: intercept F1 key presses at the filter stage so we
+        // capture them even when a control consumes the event.
+        getRoot().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.F1) {
+                handleHelp();
+                event.consume();
+            }
+        });
     }
 
     /**
@@ -138,6 +151,7 @@ public class MainWindow extends UiPart<Stage> {
 
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());
+        resultDisplay.setFeedbackToUser(WELCOME_MESSAGE);
 
         StatusBarFooter statusBarFooter = new StatusBarFooter(logic.getAddressBookFilePath());
         statusbarPlaceholder.getChildren().add(statusBarFooter.getRoot());
@@ -220,37 +234,7 @@ public class MainWindow extends UiPart<Stage> {
      */
     private CommandResult executeCommand(String commandText) throws CommandException, ParseException {
         try {
-            CommandResult commandResult;
-
-            // case 1: awaiting yes/no confirmation message from user
-            if (isAwaitingDeleteConfirmation) {
-                String trimmedCommand = commandText.trim().toLowerCase();
-
-                if (trimmedCommand.equals("yes")) {
-                    isAwaitingDeleteConfirmation = false;
-                    String deleteCommandToExecute = pendingDeleteCommandText;
-                    pendingDeleteCommandText = null;
-                    commandResult = logic.execute(deleteCommandToExecute);
-                } else if (trimmedCommand.equals("no")) {
-                    isAwaitingDeleteConfirmation = false;
-                    pendingDeleteCommandText = null;
-                    commandResult = new CommandResult(MESSAGE_DELETE_CANCELLED);
-                } else {
-                    commandResult = new CommandResult(MESSAGE_INVALID_CONFIRMATION_RESPONSE);
-                }
-
-            // case 2: delete action requested and is fully valid
-            } else {
-                Person personToDelete = logic.getPersonToDelete(commandText);
-
-                if (personToDelete != null) {
-                    isAwaitingDeleteConfirmation = true;
-                    pendingDeleteCommandText = commandText;
-                    commandResult = new CommandResult(String.format(MESSAGE_CONFIRM_DELETE, personToDelete.getName()));
-                } else {
-                    commandResult = logic.execute(commandText);
-                }
-            }
+            CommandResult commandResult = logic.execute(commandText);
 
             logger.info("Result: " + commandResult.getFeedbackToUser());
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
@@ -266,14 +250,14 @@ public class MainWindow extends UiPart<Stage> {
             if (commandResult.isExit()) {
                 handleExit();
             }
+
             if (viewWindow.isShowing()) {
-                // Find the updated version of the person from the logic/model
-                // and pass it to the viewWindow again.
                 logic.getFilteredPersonList().stream()
                         .filter(p -> viewWindow.isViewing(p))
                         .findFirst()
                         .ifPresent(updatedPerson -> viewWindow.setPerson(updatedPerson));
             }
+
             return commandResult;
         } catch (CommandException | ParseException e) {
             logger.info("An error occurred while executing command: " + commandText);
