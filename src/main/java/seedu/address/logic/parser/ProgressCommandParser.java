@@ -28,7 +28,13 @@ public class ProgressCommandParser implements Parser<ProgressCommand> {
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_PROGRESS);
 
-        Index index = ParserUtil.parseIndex(argMultimap.getPreamble());
+        String preamble = argMultimap.getPreamble().trim();
+
+        if (!preamble.matches("\\d+")) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, ProgressCommand.MESSAGE_USAGE));
+        }
+
+        Index index = ParserUtil.parseIndex(preamble);
         Progress progress = ParserUtil.parseProgress(argMultimap.getValue(PREFIX_PROGRESS).get());
 
         return new ProgressCommand(index, progress);
