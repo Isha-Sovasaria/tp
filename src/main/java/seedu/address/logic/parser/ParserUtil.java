@@ -29,6 +29,8 @@ public class ParserUtil {
     public static final String MESSAGE_TOO_MANY_ARGUMENTS = "Only one student index is allowed.";
     public static final String MESSAGE_INVALID_PROGRESS =
             "Invalid progress value. Allowed values are: on_track, needs_attention, at_risk, clear.";
+    public static final String MESSAGE_INVALID_ABSENCE_COUNT =
+            "Absence count must be a non-negative integer.";
     public static final String MESSAGE_INVALID_KEYWORDS =
             "Keywords should contain alphabetic characters separated by spaces only.";
     public static final String MESSAGE_EMPTY_KEYWORDS =
@@ -285,7 +287,7 @@ public class ParserUtil {
         String trimmed = stringAbsenceCount.trim();
 
         if (!trimmed.matches("\\d+")) {
-            throw new ParseException("Absence count must be a non-negative integer.");
+            throw new ParseException(MESSAGE_INVALID_ABSENCE_COUNT);
         }
 
         return Integer.parseInt(trimmed);
