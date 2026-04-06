@@ -1,0 +1,183 @@
+{
+  "enableSearch": true,
+  "pages": [
+    {
+      "src": "AboutUs.md",
+      "title": "About Us",
+      "headings": {
+        "about-us": "About Us",
+        "project-team": "Project team",
+        "isha-sovasaria": "Isha Sovasaria",
+        "chen-guanyou": "Chen Guanyou",
+        "hyder": "Hyder",
+        "ashutosh-menon-rajeev": "Ashutosh Menon Rajeev",
+        "ariel-chua": "Ariel Chua"
+      },
+      "headingKeywords": {}
+    },
+    {
+      "src": "Configuration.md",
+      "title": "Configuration guide",
+      "headings": {
+        "configuration-guide": "Configuration guide"
+      },
+      "headingKeywords": {}
+    },
+    {
+      "src": "DevOps.md",
+      "title": "DevOps guide",
+      "headings": {
+        "devops-guide": "DevOps guide",
+        "build-automation": "Build automation",
+        "continuous-integration-ci": "Continuous integration (CI)",
+        "code-coverage": "Code coverage",
+        "repository-wide-checks": "Repository-wide checks",
+        "making-a-release": "Making a release"
+      },
+      "headingKeywords": {}
+    },
+    {
+      "src": "DeveloperGuide.md",
+      "title": "Developer Guide",
+      "headings": {
+        "teachassist-developer-guide": "TeachAssist Developer Guide",
+        "acknowledgements": "Acknowledgements",
+        "third-party-libraries": "Third-Party Libraries",
+        "development-tools": "Development Tools",
+        "setting-up-getting-started": "Setting up, getting started",
+        "design": "Design",
+        "architecture": "Architecture",
+        "ui-component": "UI component",
+        "logic-component": "Logic component",
+        "model-component": "Model component",
+        "storage-component": "Storage component",
+        "common-classes": "Common classes",
+        "key-feature-implementation": "Key Feature Implementation",
+        "feature-add-student": "Feature: Add Student",
+        "feature-delete-student": "Feature: Delete Student",
+        "feature-update-progress": "Feature: Update Progress",
+        "feature-mark-attendance": "Feature: Mark Attendance",
+        "feature-remark-command": "Feature: Remark Command",
+        "feature-view-command": "Feature: View Command",
+        "documentation-logging-testing-configuration-dev-ops": "Documentation, logging, testing, configuration, dev-ops",
+        "appendix-requirements": "Appendix: Requirements",
+        "product-scope": "Product scope",
+        "user-stories": "User stories",
+        "use-cases": "Use cases",
+        "non-functional-requirements": "Non-Functional Requirements",
+        "glossary": "Glossary",
+        "appendix-instructions-for-manual-testing": "Appendix: Instructions for manual testing",
+        "launch-and-shutdown": "Launch and shutdown",
+        "viewing-help": "Viewing help",
+        "adding-a-student": "Adding a student",
+        "editing-a-student": "Editing a student",
+        "deleting-a-student": "Deleting a student",
+        "updating-progress": "Updating progress",
+        "marking-attendance": "Marking attendance",
+        "adding-a-remark": "Adding a remark",
+        "viewing-student-details-remarks": "Viewing student details / remarks",
+        "listing-students": "Listing students",
+        "clearing-the-student-list-sample-data": "Clearing the student list / sample data",
+        "clearing-filters": "Clearing filters",
+        "saving-data": "Saving data",
+        "suggested-exploratory-testing": "Suggested exploratory testing",
+        "appendix-planned-enhancements": "Appendix: Planned Enhancements"
+      },
+      "headingKeywords": {}
+    },
+    {
+      "src": "Documentation.md",
+      "title": "Documentation guide",
+      "headings": {
+        "documentation-guide": "Documentation Guide"
+      },
+      "headingKeywords": {}
+    },
+    {
+      "src": "Logging.md",
+      "title": "Logging guide",
+      "headings": {
+        "logging-guide": "Logging guide"
+      },
+      "headingKeywords": {}
+    },
+    {
+      "src": "SettingUp.md",
+      "title": "Setting up and getting started",
+      "headings": {
+        "setting-up-and-getting-started": "Setting up and getting started",
+        "setting-up-the-project-in-your-computer": "Setting up the project in your computer",
+        "before-writing-code": "Before writing code"
+      },
+      "headingKeywords": {}
+    },
+    {
+      "src": "Testing.md",
+      "title": "Testing guide",
+      "headings": {
+        "testing-guide": "Testing guide",
+        "running-tests": "Running tests",
+        "types-of-tests": "Types of tests"
+      },
+      "headingKeywords": {}
+    },
+    {
+      "src": "UserGuide.md",
+      "title": "User Guide",
+      "headings": {
+        "teachassist-user-guide": "TeachAssist User Guide",
+        "table-of-contents": "Table of contents",
+        "quick-start": "Quick start",
+        "features": "Features",
+        "viewing-help-help": "Viewing help : help",
+        "listing-all-students-list": "Listing all students: list",
+        "-2": "",
+        "adding-a-student-add": "Adding a student: add",
+        "-3": "",
+        "deleting-a-student-delete": "Deleting a student : delete",
+        "-4": "",
+        "clears-all-students-clear": "Clears all students : clear",
+        "-5": "",
+        "finding-students-by-name-find": "Finding students by name: find",
+        "-6": "",
+        "filtering-students-filter": "Filtering students: filter",
+        "-7": "",
+        "editing-a-student-edit": "Editing a student: edit",
+        "-8": "",
+        "viewing-a-student-view": "Viewing a student: view",
+        "-9": "",
+        "marks-a-students-attendance-markattendance": "Marks a students attendance: markattendance",
+        "-10": "",
+        "updating-a-student-s-progress-updateprogress": "Updating a student's progress : updateprogress",
+        "-11": "",
+        "adding-a-remark-remark": "Adding a remark : remark",
+        "-12": "",
+        "removing-a-remark-unremark": "Removing a remark : unremark",
+        "-13": "",
+        "adding-a-remark-remark-2": "Adding a remark: remark",
+        "deleting-a-remark-unremark": "Deleting a remark: unremark",
+        "exiting-the-program-exit": "Exiting the program : exit",
+        "saving-the-data": "Saving the data",
+        "command-summary": "Command summary",
+        "faq": "FAQ"
+      },
+      "headingKeywords": {}
+    },
+    {
+      "src": "index.md",
+      "title": "",
+      "headings": {
+        "teachassist": "TeachAssist"
+      },
+      "headingKeywords": {}
+    },
+    {
+      "src": "team/johndoe.md",
+      "title": "John Doe's Project Portfolio Page",
+      "headings": {
+        "project-addressbook-level-3": "Project: AddressBook Level 3"
+      },
+      "headingKeywords": {}
+    }
+  ]
+}
