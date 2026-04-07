@@ -79,7 +79,7 @@ public class EditCommand extends Command {
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
-        if (!personToEdit.isSamePerson(editedPerson) && model.hasPerson(editedPerson)) {
+        if (!personToEdit.equals(editedPerson) && model.hasPerson(editedPerson)) {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
 
@@ -102,8 +102,11 @@ public class EditCommand extends Command {
         TGroup updatedTGroup = editPersonDescriptor.getTGroup().orElse(personToEdit.getTGroup());
         Tele updatedTele = editPersonDescriptor.getTele().orElse(personToEdit.getTele());
 
-        return new Person(updatedName, updatedCourseId, updatedEmail, updatedStudentId,
+        Person editedPerson = new Person(updatedName, updatedCourseId, updatedEmail, updatedStudentId,
                 updatedTGroup, updatedTele, personToEdit.getWeekList(), personToEdit.getProgress());
+
+        editedPerson.getRemarks().forEach(editedPerson::addRemark);
+        return editedPerson;
     }
 
     @Override
