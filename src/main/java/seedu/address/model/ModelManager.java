@@ -19,6 +19,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.person.CourseId;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.Remark;
 import seedu.address.model.person.TGroup;
 import seedu.address.model.person.WeekList;
 
@@ -227,7 +228,7 @@ public class ModelManager implements Model {
             }
         }
 
-        return new Person(
+        Person updatedPerson = new Person(
                 person.getName(),
                 person.getCourseId(),
                 person.getEmail(),
@@ -237,6 +238,12 @@ public class ModelManager implements Model {
                 weekList,
                 person.getProgress()
         );
+
+        for (Remark remark : person.getRemarks()) {
+            updatedPerson.addRemark(remark);
+        }
+
+        return updatedPerson;
     }
 
     private String makeKey(CourseId courseId, TGroup tGroup) {

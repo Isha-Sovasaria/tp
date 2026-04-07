@@ -23,6 +23,7 @@ import seedu.address.model.person.CourseId;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.Remark;
 import seedu.address.model.person.StudentId;
 import seedu.address.model.person.TGroup;
 import seedu.address.model.person.Tele;
@@ -105,7 +106,9 @@ public class EditCommand extends Command {
         Person editedPerson = new Person(updatedName, updatedCourseId, updatedEmail, updatedStudentId,
                 updatedTGroup, updatedTele, personToEdit.getWeekList(), personToEdit.getProgress());
 
-        editedPerson.getRemarks().forEach(editedPerson::addRemark);
+        for (Remark remark : personToEdit.getRemarks()) {
+            editedPerson.addRemark(remark);
+        }
         return editedPerson;
     }
 
