@@ -459,7 +459,7 @@ updateprogress id/STUDENT_ID crs/COURSE_ID tg/TUTORIAL_GROUP p/PROGRESS
 <a name="remark"></a>
 ### Adding a remark : `remark`
 
-Adds a textual remark to the student.
+Need to record an important note about a student? Use the `remark` command to attach a remark directly to that student’s record! Keep track of class participation, proficiency in topics, or just general remarks of a student!
 
 Format:
 ```
@@ -471,11 +471,22 @@ Examples:
 remark 1 txt/Participates actively in class!
 ```
 
+Notes:
+* The remark must be prefixed with `txt/`.
+* If multiple `txt/` prefixes are provided, only the first `txt/` is treated as a prefix, subsequent `txt/` prefixes will be treated as part of the remark
+* Each remark is limited to a 100 characters. Keep your remarks concise!
+
+Example:
+```
+remark 1 txt/Needs more practice on txt/recursion
+```
+will be stored as `Needs more practice on txt/recursion`
+
 
 <a name="unremark"></a>
 ### Removing a remark : `unremark`
 
-Removes the specified remark from the student.
+Over time, some remarks may become outdated, unnecessary, or incorrect. The `unremark` feature lets you delete a specific remark from a student’s record when it is no longer useful.
 
 Format:
 ```
