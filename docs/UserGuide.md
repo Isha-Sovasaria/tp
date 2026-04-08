@@ -185,7 +185,7 @@ i.e. If you use an email domain that isnt @u.nus.edu:
 ### Finding students by name: `find`
 
 Let's be real, the list of students gets long, and it's tough to keep scrolling to find a student.
-That's why we have the `find` command! It helps you narrow the student list down using the **beginning of any word in their name**. so you can locate the right student more quickly.
+That's why we have the `find` command! It helps you instantly locate students using the **beginning of any word in their name**.
 
 Format: `find KEYWORD [MORE_KEYWORDS]...`
 
