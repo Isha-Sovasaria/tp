@@ -6,7 +6,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_STUDENTID;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TGROUP;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.ConfirmationManager;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.CourseId;
@@ -17,12 +16,6 @@ import seedu.address.model.person.TGroup;
  * Parses input arguments and creates a new DeleteCommand object.
  */
 public class DeleteCommandParser implements Parser<DeleteCommand> {
-
-    private final ConfirmationManager confirmationManager;
-
-    public DeleteCommandParser(ConfirmationManager confirmationManager) {
-        this.confirmationManager = confirmationManager;
-    }
 
     /**
      * Parses the given {@code String} of arguments in the context of the DeleteCommand
@@ -59,25 +52,25 @@ public class DeleteCommandParser implements Parser<DeleteCommand> {
             CourseId courseId = ParserUtil.parseCourseId(argMultimap.getValue(PREFIX_COURSEID).get());
             TGroup tGroup = ParserUtil.parseTGroup(argMultimap.getValue(PREFIX_TGROUP).get());
 
-            return new DeleteCommand(studentId, courseId, tGroup, confirmationManager);
-        } else {
-            if (trimmedInput.matches("[1-9]\\d*\\s+.+")) {
-                throw new ParseException(DeleteCommand.MESSAGE_UNEXPECTED_TEXT_AFTER_INDEX
-                        + "\n" + DeleteCommand.MESSAGE_USAGE);
-            }
-
-            if (trimmedInput.matches("[1-9]\\d*")) {
-                Index index = ParserUtil.parseIndex(trimmedInput);
-                return new DeleteCommand(index, confirmationManager);
-            }
-
-            if (trimmedInput.matches("-?\\d+(\\.\\d+)?")) {
-                throw new ParseException(DeleteCommand.MESSAGE_INVALID_INDEX
-                        + "\n" + DeleteCommand.MESSAGE_USAGE);
-            }
-
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
+            return new DeleteCommand(studentId, courseId, tGroup);
         }
+
+        if (trimmedInput.matches("[1-9]\\d*\\s+.+")) {
+            throw new ParseException(DeleteCommand.MESSAGE_UNEXPECTED_TEXT_AFTER_INDEX
+                    + "\n" + DeleteCommand.MESSAGE_USAGE);
+        }
+
+        if (trimmedInput.matches("[1-9]\\d*")) {
+            Index index = ParserUtil.parseIndex(trimmedInput);
+            return new DeleteCommand(index);
+        }
+
+        if (trimmedInput.matches("-?\\d+(\\.\\d+)?")) {
+            throw new ParseException(DeleteCommand.MESSAGE_INVALID_INDEX
+                    + "\n" + DeleteCommand.MESSAGE_USAGE);
+        }
+
+        throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
     }
 
     /**
