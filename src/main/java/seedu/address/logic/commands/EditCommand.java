@@ -7,7 +7,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_STUDENTID;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TELE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TGROUP;
-import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.List;
 import java.util.Objects;
@@ -23,6 +22,7 @@ import seedu.address.model.person.CourseId;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.Remark;
 import seedu.address.model.person.StudentId;
 import seedu.address.model.person.TGroup;
 import seedu.address.model.person.Tele;
@@ -72,6 +72,10 @@ public class EditCommand extends Command {
         requireNonNull(model);
         List<Person> lastShownList = model.getFilteredPersonList();
 
+        if (!editPersonDescriptor.isAnyFieldEdited()) {
+            throw new CommandException(MESSAGE_NOT_EDITED);
+        }
+
         if (index.getZeroBased() >= lastShownList.size()) {
             throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
@@ -79,12 +83,11 @@ public class EditCommand extends Command {
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
-        if (!personToEdit.isSamePerson(editedPerson) && model.hasPerson(editedPerson)) {
+        if (!personToEdit.equals(editedPerson) && model.hasPerson(editedPerson)) {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
 
         model.setPerson(personToEdit, editedPerson);
-        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
         return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson)));
     }
 
@@ -102,8 +105,13 @@ public class EditCommand extends Command {
         TGroup updatedTGroup = editPersonDescriptor.getTGroup().orElse(personToEdit.getTGroup());
         Tele updatedTele = editPersonDescriptor.getTele().orElse(personToEdit.getTele());
 
-        return new Person(updatedName, updatedCourseId, updatedEmail, updatedStudentId,
+        Person editedPerson = new Person(updatedName, updatedCourseId, updatedEmail, updatedStudentId,
                 updatedTGroup, updatedTele, personToEdit.getWeekList(), personToEdit.getProgress());
+
+        for (Remark remark : personToEdit.getRemarks()) {
+            editedPerson.addRemark(remark);
+        }
+        return editedPerson;
     }
 
     @Override

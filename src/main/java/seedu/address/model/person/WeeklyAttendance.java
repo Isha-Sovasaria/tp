@@ -19,7 +19,15 @@ public interface WeeklyAttendance {
      */
     public void markAsDefault();
 
-    void markAsCancelled() throws IllegalStateException;
+    /**
+     * Marks this week to be cancelled.
+     */
+    public void markAsCancelled() throws IllegalStateException;
+
+    /**
+     * Marks this week to be the old status.
+     */
+    public void markAsUncancelled() throws IllegalStateException;
 
     /**
      * Returns whether this week has been marked as attended.
@@ -42,7 +50,7 @@ public interface WeeklyAttendance {
     /**
      * @return the attendance status of the week session
      */
-    public String getStatus();
+    public Week.Status getStatus();
 
     public boolean isAbsent();
 

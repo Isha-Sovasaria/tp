@@ -97,6 +97,11 @@ public class AddCommandTest {
         }
 
         @Override
+        public ObservableList<Person> getFullPersonList() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public ReadOnlyUserPrefs getUserPrefs() {
             throw new AssertionError("This method should not be called.");
         }
@@ -157,6 +162,16 @@ public class AddCommandTest {
         }
 
         @Override
+        public boolean hasCourseTGroup(CourseId courseId, TGroup tGroup) {
+            return false;
+        }
+
+        @Override
+        public boolean isWeekCancelled(CourseId courseId, TGroup tGroup, int weekIdx) {
+            return false;
+        }
+
+        @Override
         public Set<Integer> getCancelledWeeks(CourseId courseId, TGroup tGroup) {
             return Set.of();
         }
@@ -196,7 +211,7 @@ public class AddCommandTest {
         @Override
         public boolean hasPerson(Person person) {
             requireNonNull(person);
-            return this.person.isSamePerson(person);
+            return this.person.equals(person);
         }
     }
 
@@ -209,7 +224,7 @@ public class AddCommandTest {
         @Override
         public boolean hasPerson(Person person) {
             requireNonNull(person);
-            return personsAdded.stream().anyMatch(person::isSamePerson);
+            return personsAdded.stream().anyMatch(person::equals);
         }
 
         @Override

@@ -63,8 +63,8 @@ public class RemarkCommandTest {
 
         CommandResult commandResult = command.execute(modelStub);
 
-        assertEquals(String.format(RemarkCommand.MESSAGE_ADD_REMARKS_SUCCESS, person),
-                commandResult.getFeedbackToUser());
+        assertEquals(String.format(RemarkCommand.MESSAGE_ADD_REMARKS_SUCCESS, Messages.format(person) + "\n"
+                + "Remark: " + remark.getText()), commandResult.getFeedbackToUser());
         assertEquals(1, person.getRemarks().size());
         assertEquals(remark, person.getRemarks().get(0));
     }
@@ -112,6 +112,11 @@ public class RemarkCommandTest {
     private class ModelStub implements Model {
         @Override
         public void removeCancelledWeek(CourseId courseId, TGroup tGroup, int weekNumber) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public ObservableList<Person> getFullPersonList() {
             throw new AssertionError("This method should not be called.");
         }
 
@@ -193,6 +198,16 @@ public class RemarkCommandTest {
         @Override
         public ObservableList<Person> getFilteredPersonList() {
             throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public boolean hasCourseTGroup(CourseId courseId, TGroup tGroup) {
+            return false;
+        }
+
+        @Override
+        public boolean isWeekCancelled(CourseId courseId, TGroup tGroup, int weekIdx) {
+            return false;
         }
 
         @Override

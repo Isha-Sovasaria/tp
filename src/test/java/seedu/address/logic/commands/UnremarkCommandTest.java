@@ -63,7 +63,8 @@ public class UnremarkCommandTest {
 
         CommandResult commandResult = command.execute(modelStub);
 
-        assertEquals(String.format(UnremarkCommand.MESSAGE_DELETE_REMARKS_SUCCESS, person),
+        assertEquals(String.format(UnremarkCommand.MESSAGE_DELETE_REMARKS_SUCCESS, Messages.format(person) + "\n"
+                + "Deleted Remark: " + remark.getText()),
                 commandResult.getFeedbackToUser());
         assertEquals(0, person.getRemarks().size());
     }
@@ -135,6 +136,11 @@ public class UnremarkCommandTest {
     private class ModelStub implements Model {
         @Override
         public void removeCancelledWeek(CourseId courseId, TGroup tGroup, int weekNumber) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public ObservableList<Person> getFullPersonList() {
             throw new AssertionError("This method should not be called.");
         }
 
@@ -211,6 +217,16 @@ public class UnremarkCommandTest {
         @Override
         public ObservableList<Person> getFilteredPersonList() {
             throw new AssertionError();
+        }
+
+        @Override
+        public boolean hasCourseTGroup(CourseId courseId, TGroup tGroup) {
+            return false;
+        }
+
+        @Override
+        public boolean isWeekCancelled(CourseId courseId, TGroup tGroup, int weekIdx) {
+            return false;
         }
 
         @Override

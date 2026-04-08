@@ -6,66 +6,104 @@
 
 # TeachAssist User Guide
 
-TeachAssist is a desktop app for full-time Teaching Assistants (TAs) at the National University of Singapore (NUS) who manage student records across multiple courses and tutorial groups. It helps TAs record attendance, track student progress, search for student details, and update or remove records. Users can type commands to complete tasks quickly, while the app also provides a clear visual interface for viewing and managing student information.
+Are you tired of juggling multiple platforms—tracking tutorials, managing attendance and progress, and keeping track of endless student records? Do you find yourself struggling with clunky spreadsheets and endless menus? TeachAssist is for you.
 
-This guide assumes that users are familiar with basic computer operations, such as opening a terminal or command window, running the application with a given command, and managing files such as copying or backing up data. Users do not need programming knowledge or an understanding of how the application is built.
+TeachAssist is a desktop application designed for full-time University Teaching Assistants (TAs) at NUS who manage multiple classes and tutorials each semester.If you're a fast typist, TeachAssist can help you quickly filter student lists, track attendance, and log important notes using straightforward keyboard commands, all while offering an easy-to-navigate visual interface.
+
+And the best part? No technical expertise needed—just basic computer skills like installing software and navigating files.
 
 ## Table of contents
-- [Quick Start](#quick-start)
 - [Features](#features)
   - [Viewing help: `help`](#help)
-  - [Listing all students `list`](#list)
+  - [Listing all students: `list`](#list)
   - [Adding a student: `add`](#add)
+  - [Finding students by name: `find`](#finding-students-by-name-find)
+  - [Filtering students: `filter`](#filter)
+  - [Editing a student: `edit`](#edit)
+  - [Marking a student's attendance: `markattendance`](#mark-attendance)
+  - [Updating a student's progress: `updateprogress`](#update-progress)
+  - [Cancelling a tutorial's week: `cancelweek`](#cancel-week)
+  - [Unancelling a tutorial's week: `uncancelweek`](#uncancel-week)
+  - [Remarks](#remarks)
+    - [Adding a remark: `remark`](#remark)
+    - [Deleting a remark: `unremark`](#unremark)
+  - [Viewing a student: `view`](#view)
   - [Deleting a student: `delete`](#delete)
     - [Delete by index](#deletebyindex)
     - [Delete by student details](#deletebydetails)
-  - [Clearing all contacts: `clear`](#clear)
-  - [Finding a student: `find`](#finding-students-by-name-find)
-  - [Filtering students: `filter`](#filter)
-  - [Editing a student: `edit`](#edit)
-  - [Viewing a student: `view`](#view)
-  - [Marking a student's attendance: `markattendance`](#mark-attendance)
-  - [Updating a student's progress: `updateprogress`](#update-progress)
-  - [Adding a remark: `remark`](#remark)
-  - [Deleting a remark: `unremark`](#unremark)
-  - [Exiting the app](#exit)
+  - [Clearing all students: `clear`](#clear)
+  - [Exiting the app: `exit`](#exit)
 - [Command Summary](#command-summary)
 - [Parameter Summary](#parameter-summary)
 - [FAQ](#faq)
-
 ---
 ## Quick start
 
-1. Ensure you have **Java 17** or above install on your computer.<br>
-> **Checking your Java version**
-> - Open a command terminal on your computer.
-> - Type `java -version` and press Enter.
-> - If Java is installed, you will be shown the version number (e.g. `java version 17.0.1`).
-> - The first number should be 17 or higher.
->
-> **If Java is not installed, or the version number is below 17:**
-> - Download and install Java 17 by following the guide:
-    >   - [for Windows users](https://se-education.org/guides/tutorials/javaInstallationWindows.html) [for Mac users](https://se-education.org/guides/tutorials/javaInstallationMac.html) [for Linux users](https://se-education.org/guides/tutorials/javaInstallationLinux.html)
-> - After installation, restart your terminal and check that the correct version has been installed.
+Can't wait to get TeachAssist up and running? Let’s begin!
 
-2. Download the latest `TeachAssist.jar` file from [here](https://github.com/AY2526S2-CS2103T-F10-3/tp/releases/tag/v1.3)
-3. Copy the `TeachAssist.jar` file to the folder you want to use as the _home folder_ for your LambdaLab.
-4. Open the command terminal again and do the following:
-    - Type `cd name-of-your-home-folder` and press Enter.
-    - Type `java -jar TeachAssist.jar` and press Enter to run the application.
-      A GUI similar to the below should appear in a few seconds. Note how the app contains some sample data.<br>
-      ![Ui](images/Ui.png)
+1. **Ensure that Java 17 or above is installed on your computer.**<br>
 
-5. Type the command in the command box and press Enter to execute it. e.g. typing `help` and pressing Enter will open the help window.<br>
-   Some example commands you can try:
-    - `help` : Shows the help window that explains the command usage.
-    - `list` : Lists all students.
-    - `delete 3`: Deletes the student at the current list's index 3.
-    - `add n/John Doe id/A0123456X e/johnd@u.nus.edu.com crs/CS2103T tg/T01 tel/@johndoe`: Adds a student named `John Doe`.
-    - `clear`: Deletes all students.
-    - `exit`: Exits the app.
+   > **To check your Java version:**
+   > 1. Open a command terminal on your computer.
+   > 2. Type `java -version` and press Enter.
+   > 3. Look at the first number in the version shown. It should be `17` or higher.
+   >
+   > Example:
+   > ```bash
+   > java -version
+   > ```
+   > ```bash
+   > java version "17.0.1"
+   > ```
+   >
+   > **If Java is not installed, or your version is below 17:**
+   > - Install Java 17 using the guide for your operating system:
+   >   - [Windows](https://se-education.org/guides/tutorials/javaInstallationWindows.html)
+   >   - [Mac](https://se-education.org/guides/tutorials/javaInstallationMac.html)
+   >   - [Linux](https://se-education.org/guides/tutorials/javaInstallationLinux.html)
+   > - After installation, restart your terminal and run `java -version` again to confirm that the correct version is installed.
+  
 
-6. Refer to the [Features](#features) below for details of each command.
+2. **Download the latest `TeachAssist.jar` file** from the [Releases page](https://github.com/AY2526S2-CS2103T-F10-3/tp/releases/tag/v1.3).
+
+3. **Move the downloaded file into a folder you want to use as the TeachAssist home folder.**  
+   This folder will be used to store the app and its data.
+   
+   Example:
+   - You may create a folder named `TeachAssist` on your Desktop.
+   - Then move `TeachAssist.jar` into that folder.
+
+4. **Open a terminal in that folder.**
+   - Navigate to the folder containing `TeachAssist.jar`.
+   - For example, if your folder is named `TeachAssist`, type:
+     ```bash
+     cd TeachAssist
+     ```
+
+5. **Run the application** by entering:
+   ```bash
+   java -jar TeachAssist.jar
+   ```
+
+   After a few seconds, the GUI should appear, similar to the screenshot below.  
+   Notice that the app starts with some sample data for you to try out the commands.
+
+   ![Ui](images/Ui.png)
+
+6. **Try entering a command in the command box.**  
+   A good place to start is help. Type it in and press Enter to open the help window and view the list of available commands.
+
+7. **Try these example commands:**
+   - `help` : Opens the help window.
+   - `list` : Lists all students.
+   - `delete 3` : Deletes the student at index `3` in the current list.
+   - `add n/John Doe id/A0123456X e/johnd@u.nus.edu crs/CS2103T tg/T01 tel/@johndoe` : Adds a student named `John Doe`.
+   - `clear` : Deletes all students.
+   - `exit` : Exits the app.
+
+8. **Refer to the [Features](#features) section below** for the full list of commands and detailed usage instructions.
+
+You’re all set! From here, head to the Features section to learn what TeachAssist can do.
 
 ---
 
@@ -74,7 +112,7 @@ This guide assumes that users are familiar with basic computer operations, such 
 <a name="help"></a>
 ### Viewing help : `help`
 
-Shows a message explaining how to access the User Guide and displays the available commands.
+If you ever need a quick refresher on TeachAssist features, the Help Window provides a summary of all commands and a direct link to the User Guide.
 
 ![help message](images/helpMessage.png)
 
@@ -83,7 +121,9 @@ Format:
 help
 ```
 
-## 
+<box type="tip">
+Tip: You can also press F1 to open the Help window!.
+</box>
 
 <a name="list"></a>
 ### Listing all students: `list`
@@ -95,7 +135,6 @@ Format:
 list
 ```
 
-##
 
 <a name="add"></a>
 ### Adding a student: `add`
@@ -112,52 +151,268 @@ Examples:
 add n/JOHN DOE id/A0123456X e/johnd@u.nus.edu crs/CS2103T tg/T01 tel/@JOHNDOE
 ```
 
-##
+When done successfully, it should look like this:
 
-<a name="delete"></a>
-### Deleting a student : `delete`
+![successful add](images/successfulAdd.png)
 
-Deletes a student by INDEX or by student details.
+If any required fields are missing or the index is wrong, an error will be shown:
 
-<a name="deletebyindex"></a>
-**Delete by index**
+![add error](images/errorAdd.png)
+
+<find>
+
+<filter>
+
+<a name="edit"></a>
+### Editing a student: `edit`
+
+Edits a student based on the index given. At least one field must be present.
 
 Format:
 ```
+edit [n\NAME] [id/STUDENT_ID] [e/EMAIL] [crs/COURSE_ID] [tg/TUTORIAL_GROUP] [tel/TELEGRAM_USERNAME]
+```
+
+Examples:
+```
+edit 1 n/JOHN HOE
+```
+
+When done successfully, it should look like this:
+
+![successful edit](images/successfulEdit.png)
+
+If any required fields are missing or wrong, an error will be shown:
+
+![edit error index 0](images/errorEditIndexZero.png)
+
+![edit error index out](images/errorEditIndexOut.png)
+
+![edit error no field](images/errorEditNoField.png)
+
+<markattendance>
+### Marks a students attendance: `markattendance`
+![MarkAttendanceUI.png](images/MarkAttendanceUI.png)
+**Update attendance by index, week, status**
+
+Format:
+```
+markattendance INDEX week/WEEK sta/STATUS
+```
+
+* Updates the attendance of student at the specified `INDEX` and `WEEK` to `STATUS`.
+* The index refers to the index number shown in the currently displayed student list.
+* The index **must be a positive integer** 1, 2, 3, …
+* The week referes to school weeks, which are visible to the right of teachassist
+
+**Examples**:
+`markattendance 1 week/3 sta/y`
+* marks the attendance of the 1st student's attendance in week 3 as present -> Green.
+
+`markattendance 2 week/6 sta/a`
+* marks the attendance of the 2nd student's attendance in week 6 as absent -> Red.
+
+`markattendance 4 week/4 sta/n`
+* marks the attendance of the 4th student's attendance in week 4 as unmarked -> Grey.
+
+##
+<cancelweek>
+<a name="cancel-week"></a>
+### Cancelling a tutorial's week: `cancelweek`
+![CancelWeekUI.png](images/CancelWeekUI.png)
+Marks a specific week as **cancelled** for all students in a given course and tutorial group.
+
+Format:
+
+cancelweek crs/COURSE_ID tg/TUTORIAL_GROUP week/WEEK
+
+
+* Cancels the specified `WEEK` for **all students** in the matching `COURSE_ID` and `TUTORIAL_GROUP`.
+* A cancelled week will be reflected in each student’s attendance record.
+* If the week is already cancelled, the command will have no additional effect.
+* The cancellation is applied to:
+    * Existing students in that course and tutorial group.
+    * Future students added to the same course and tutorial group.
+
+**Examples**:
+
+cancelweek crs/CS2103T tg/T01 week/5
+
+* Cancels week 5 for all students in CS2103T tutorial group T01.
+
+##
+<uncancelweek>
+<a name="uncancel-week"></a>
+### Uncancelling a tutorial's week: `uncancelweek`
+Reverts a previously cancelled week for a specific course and tutorial group.
+
+Format:
+
+uncancelweek crs/COURSE_ID tg/TUTORIAL_GROUP week/WEEK
+
+
+* Removes the cancelled status for the specified `WEEK`.
+* The week will return to a normal attendance state for all students in the matching course and tutorial group.
+* This affects:
+    * Existing students (their week status will be updated).
+    * Future students (the week will no longer be auto-marked as cancelled).
+* If the week was not previously cancelled, the command will have no effect.
+
+**Examples**:
+
+uncancelweek crs/CS2103T tg/T01 week/5
+
+* Restores week 5 as a normal week for all students in CS2103T tutorial group T01.
+
+<a name="update-progress"></a>
+### Updating a student's progress : `updateprogress`
+
+Need to quickly flag a student who is doing well, falling behind, or needs closer follow-up? Use `updateprogress` to keep that status up to date.
+
+Format:
+```
+updateprogress INDEX p/PROGRESS
+```
+
+* Updates the progress of the student at the specified `INDEX`.
+* The index refers to the index number shown in the currently displayed student list.
+* The index **must be a positive integer** `1`, `2`, `3`, …
+* Supported progress values:
+  * `on_track`
+  * `needs_attention`
+  * `at_risk`
+  * `not_set`
+* Progress is case-insensitive, so values such as `ON_TRACK` and `on_track` are both accepted.
+
+<box type="tip">
+Tip: To remove a student's progress tag, use `not_set` as the progress value.
+</box>
+
+Examples:
+```
+updateprogress 1 p/on_track
+updateprogress 2 p/needs_attention
+updateprogress 3 p/not_set
+```
+The progress tags added should look like the following:
+
+![progress updated](images/updateProgressExample.png)
+
+<remark>
+
+### Remarks
+
+<a name="remark"></a>
+
+#### Adding a remark : `remark`
+
+Need to record an important note about a student? Use the `remark` command to attach a remark directly to that student’s record! Keep track of class participation, proficiency in topics, or just general remarks of a student!
+
+Format:
+```
+remark INDEX txt/REMARK
+```
+
+Examples:
+```
+remark 1 txt/Participates actively in class!
+```
+
+Notes:
+* The remark must be prefixed with `txt/`.
+* If multiple `txt/` prefixes are provided, only the first `txt/` is treated as a prefix, subsequent `txt/` prefixes will be treated as part of the remark
+* Each remark is limited to a 100 characters. Keep your remarks concise!
+
+Example:
+```
+remark 1 txt/Needs more practice on txt/recursion
+```
+will be stored as `Needs more practice on txt/recursion`
+
+
+<a name="unremark"></a>
+
+#### Removing a remark : `unremark`
+
+Over time, some remarks may become outdated, unnecessary, or incorrect. The `unremark` feature lets you delete a specific remark from a student’s record when it is no longer useful.
+
+Format:
+```
+unremark INDEX r/REMARK_INDEX
+```
+
+Examples:
+```
+unremark 1 r/2
+```
+
+
+<view>
+
+<a name="delete"></a>
+### Deleting a student: `delete`
+
+Need to remove a student record? TeachAssist lets you do this in two ways. The usual method is to delete by index when the student is already visible in the current list. If needed, you can also delete by the student’s stored details.
+
+<a name="deletebyindex"></a>
+#### Delete by index
+
+Use this when the student is already shown in the current list and you want the fastest way to remove them.
+
+Format:
+```text
 delete INDEX
 ```
 
 * Deletes the student at the specified `INDEX`.
 * The index refers to the index number shown in the currently displayed student list.
-* The index **must be a positive integer** 1, 2, 3, …
-
-<a name="deletebydetails"></a>
-**Delete by student details**
-
-Format:
-```
-delete id/STUDENT_ID crs/COURSE_ID tg/TUTORIAL_GROUP
-```
-
-* Deletes the student with the exact details match for `STUDENT_ID`, `COURSE_ID`, and `TUTORIAL_GROUP`.
+* The index **must be a positive integer** `1`, `2`, `3`, …
 
 **Confirmation prompt**
 
-After entering a valid `delete` command, TeachAssist will show a confirmation pop-up.<br>
+After you enter a valid `delete` command, TeachAssist will show a confirmation message.  
 Enter `yes` to proceed with the deletion, or `no` to cancel it.
 
-**Examples**:
+You should see this confirmation message shown after a valid `delete` command:
 
+![delete confirmation message](images/deleteConfirmationMessage.png)
+
+
+**Success message**
+
+Once the deletion is confirmed, TeachAssist will display a success message so you know the student has been successfully removed.
+
+![delete success message](images/deleteSuccessMessage.png)
+
+Example:
 `delete 1` followed by `yes`
 * Deletes the 1st student in the currently displayed student list.
 
-`delete id/A1234567X crs/CS2103T tg/T01` followed by `yes`
-* Deletes the student with student ID A1234567X, course CS2103T, and tutorial group T01.
-
+Example:
 `delete 3` followed by `no`
 * No change is made.
 
-##
+<a name="deletebydetails"></a>
+#### Delete by student details
+
+Need a more precise alternative? You can also delete a student by specifying their student ID, course ID, and tutorial group instead of relying on list position.
+
+Format:
+```text
+delete id/STUDENT_ID crs/COURSE_ID tg/TUTORIAL_GROUP
+```
+
+* Deletes the student with the exact matching `STUDENT_ID`, `COURSE_ID`, and `TUTORIAL_GROUP`.
+* The same confirmation flow applies: enter `yes` to confirm or `no` to cancel.
+
+<box type="warning">
+Warning: This method searches the **entire address book**, not just the students currently shown in the list. This means a student can still be deleted even if they are currently hidden by a filter.
+</box>
+
+Example:
+`delete id/A1234567X crs/CS2103T tg/T01` followed by `yes`
+* Deletes the student with student ID `A1234567X`, course `CS2103T`, and tutorial group `T01`.
+
 
 <a name="clear"></a>
 ### Clears all students : `clear`
@@ -169,35 +424,54 @@ Format:
 clear
 ```
 
-##
+<a name="exit"></a>
+### Exiting the program : `exit`
+
+Exits the program.
+
+Format:
+```
+exit
+```
+
+### Saving the data
+
+TeachAssist data are saved in the hard disk automatically after any command that changes the data. There is no need to save manually.
+
+[end]
+
 
 <a name="find"></a>
 ### Finding students by name: `find`
 
-Finds students whose names contain any of the given keywords.
+Instantly locate students by typing the beginning of any word in their name.
 
 Format: `find KEYWORD [MORE_KEYWORDS]...`
 
+**Search Rules:**
 * The search is case-insensitive. e.g. `hans` matches `Hans`
 * The order of keywords does not matter. e.g. `Hans Bo` matches `Bo Hans`
 * Only the name field is searched
 * Keywords match the **start of words** in names (prefix matching).Substrings in the middle of words are not matched.
     * e.g. `Han` matches `Hans`
     * `an` will not match `Hans`
-* Persons matching at least one keyword are returned (i.e. `OR` search)
-    * e.g. `Hans Bo` returns `Hans Gruber`, `Bo Yang`
-* Keywords must contain only alphabetic characters (A–Z, a–z)
+* If you provide multiple keywords, TeachAssist will find students that match any of them (e.g., find Al Bob finds both Albert and Bobby)
 
-Examples:
-* `find Jo` returns `John Doe`
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
+**Example:** `find jo doe` — Finds **Jo**hn **Doe** and **Jo**anne **Doe**bertson.
 
-##
+**Expected Output:**
+The student list updates instantly to show only matching records, and the Result Box (see Figure X) displays the total count of students found.
+
+<box type="warning">
+Warning: Keywords must be alphabetic only (A–Z). Using numbers or symbols (e.g., `find A123`) will result in an error.
+</box>
+
+**Note:** The `find` command searches through the entire stored student list and replaces any existing filter — it does not apply on top of a previously displayed (filtered) list.
 
 <a name="filter"></a>
 ### Filtering students: `filter`
 
-Filters students using one or more of the available filter fields.
+Narrow down your student list by Course ID, Tutorial Group, Progress, or Absence count. This is the most efficient way to identify "at-risk" students or specific tutorial sections.
 
 Format:
 ```
@@ -206,11 +480,12 @@ filter [crs/COURSE_ID] [tg/TUTORIAL_GROUP] [p/PROGRESS] [abs/ABSENCE_COUNT]`
 
 Behaviour:
 * Course ID (`crs/`) and tutorial group (`tg/`) are matched case-insensitively.
-* Progress (`p/`) must be one of the supported tokens: `on_track`, `needs_attention`, `at_risk`, or `clear` (alias `not_set`). Parsing is case-insensitive (for example, `ON_TRACK` or `on_track` are accepted) but matching is by exact token mapping — partial or prefix matches are not supported.
+* Progress (`p/`) must be one of the supported tokens(case insensitive): `on_track`, `needs_attention`, `at_risk`, or `clear` (alias `not_set`).
 * Absence count (`abs/`) matches students whose absence count is greater than or equal to the provided number.
 * Multiple filters combine with AND semantics — a student must satisfy every provided filter to be included in the results.
-* At least one filter parameter must be provided; using no parameters will result in an error.
-* Note: the `filter` command applies to the entire stored student list and replaces any existing filter — it does not apply on top of a previously displayed (filtered) list.
+
+**Warning:**At least one filter parameter must be provided; using no parameters will result in an error.
+** Note:** the `filter` command applies to the entire stored student list and replaces any existing filter — it does not apply on top of a previously displayed (filtered) list.
 
 Examples:
 * `filter crs/CS2103T` — returns students enrolled in CS2103T.
@@ -219,10 +494,22 @@ Examples:
 * `filter abs/2` — returns students with 2 or more absences.
 * `filter crs/CS2103T tg/T02 p/needs_attention abs/1` — returns students matching all four criteria.
 
-Expected output:
-`There are N students matching this filter.`
+**Examples:**
 
-Tip: if a filter returns no results, verify you used the correct course ID/tutor group format and valid progress values; run `help` or check the Update Progress section for exact progress tokens.
+filter crs/CS2103T — Returns all students enrolled in CS2103T.
+
+filter crs/CS2103T tg/T01 — Returns students in CS2103T and tutorial group T01.
+
+filter abs/2 — Returns students with 2 or more absences.
+
+filter crs/CS2103T tg/T02 p/needs_attention abs/1 — Returns students matching all four criteria.
+
+**Expected Output:**
+The student list updates instantly. The Result Box will display the total count:
+
+`There are 5 students matching this filter.`
+
+**Tip:** if a filter returns no results, verify you used the correct course ID/tutor group format and valid progress values; run `help` or check the Update Progress section for exact progress tokens.
 
 ##
 
@@ -250,36 +537,27 @@ Examples:
 <a name="view"></a>
 ### Viewing a student: `view`
 
-Shows student details.
+If you need to see a student's remarks history, use the view command to display their information in the side panel.
 
 Format:
 ```
 view INDEX
 ```
+**Example:** `view 1` — Displays the full details of the first student in the list.
 
-##
+**Expected Output:**
+The **View Window** on the right side of the application updates to show the selected student's details. A confirmation message also appears in the Result Box:
+> `Viewing student: John Doe; ID: A0123456X; ...`
+
+**Note** The `view` command works on the *currently filtered* list. If you have filtered the list to show only "At Risk" students, `view 1` will show the first student in that filtered sub-list.
+
+<box type="warning">
+**Warning:** If the index provided is larger than the number of students currently visible (e.g., typing `view 10` when only 5 students are listed), TeachAssist will show an "Invalid index" error.
+</box>
 
 <a name="mark-attendance"></a>
-### Marks a students attendance: `markattendance`
 
-Updates attendance using the given week and status
 
-Format:
-```
-markattendance INDEX week/WEEK_NUMBER sta/STATUS
-```
-
-* Supported attendance status values:
-    * `y` --> Present  --> Green
-    * `a` --> Absent   --> Red
-    * `n` --> Undetermined   --> Grey
-
-Examples:
-```
-markattendance 1 week/1 sta/y
-```
-
-##
 
 <a name="update-progress"></a>
 ### Updating a student's progress : `updateprogress`
@@ -322,39 +600,6 @@ updateprogress id/STUDENT_ID crs/COURSE_ID tg/TUTORIAL_GROUP p/PROGRESS
 
 ##
 
-<a name="remark"></a>
-### Adding a remark : `remark`
-
-Adds a textual remark to the student.
-
-Format:
-```
-remark INDEX txt/REMARK
-```
-
-Examples:
-```
-remark 1 txt/Participates actively in class!
-```
-
-##
-
-<a name="unremark"></a>
-### Removing a remark : `unremark`
-
-Removes the specified remark from the student.
-
-Format:
-```
-unremark INDEX r/REMARK_INDEX
-```
-
-Examples:
-```
-unremark 1 r/2
-```
-
-##
 
 <div markdown="span" class="alert alert-primary"></div>
 :bulb: **Tip:**<br><br>
@@ -393,20 +638,6 @@ markattendance INDEX week/WEEK sta/STATUS
 * Removes the remark of a student at a particular index
 
 
-<a name="exit"></a>
-### Exiting the program : `exit`
-
-Exits the program.
-
-Format:
-```
-exit
-```
-
-### Saving the data
-
-TeachAssist data are saved in the hard disk automatically after any command that changes the data. There is no need to save manually.
-
 --------------------------------------------------------------------------------------------------------------------
 
 ## Command summary
@@ -432,4 +663,3 @@ No. For commands with prefixes such as add and filter, parameters can be entered
 
 **Q: Why did delete 1 remove a different student than I expected?**
 Because the index refers to the current displayed list. You may be referring to an outdated list.
-

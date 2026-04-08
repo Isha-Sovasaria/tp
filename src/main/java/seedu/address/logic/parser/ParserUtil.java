@@ -2,6 +2,9 @@ package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Arrays;
+import java.util.List;
+
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -13,6 +16,7 @@ import seedu.address.model.person.StudentId;
 import seedu.address.model.person.TGroup;
 import seedu.address.model.person.Tele;
 import seedu.address.model.person.Week;
+import seedu.address.model.person.WeekList;
 
 
 /**
@@ -20,21 +24,87 @@ import seedu.address.model.person.Week;
  */
 public class ParserUtil {
 
-    public static final String MESSAGE_INVALID_INDEX = "Index is not a non-zero unsigned integer.";
+    public static final String KEYWORDS_VALIDATION_REGEX = "[A-Za-z]+(\\s+[A-Za-z]+)*";
+    public static final String MESSAGE_INVALID_INDEX = "Index must be a non-zero unsigned integer.";
+    public static final String MESSAGE_MISSING_INDEX = "Missing student index.";
+    public static final String MESSAGE_TOO_MANY_ARGUMENTS = "Only one student index is allowed.";
     public static final String MESSAGE_INVALID_PROGRESS =
             "Invalid progress value. Allowed values are: on_track, needs_attention, at_risk, clear.";
-
+    public static final String MESSAGE_INVALID_ABSENCE_COUNT =
+            "Absence count must be a non-negative integer.";
+    public static final String MESSAGE_INVALID_KEYWORDS =
+            "Keywords should contain alphabetic characters separated by spaces only.";
+    public static final String MESSAGE_EMPTY_KEYWORDS =
+            "Find command requires at least one keyword.";
     /**
-     * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be
-     * trimmed.
+     * Parses {@code oneBasedIndex} into an {@code Index} and returns it.
+     * Leading and trailing whitespaces will be trimmed.
+     *
      * @throws ParseException if the specified index is invalid (not non-zero unsigned integer).
      */
     public static Index parseIndex(String oneBasedIndex) throws ParseException {
+        requireNonNull(oneBasedIndex);
         String trimmedIndex = oneBasedIndex.trim();
+
         if (!StringUtil.isNonZeroUnsignedInteger(trimmedIndex)) {
             throw new ParseException(MESSAGE_INVALID_INDEX);
         }
-        return Index.fromOneBased(Integer.parseInt(trimmedIndex));
+
+        try {
+            return Index.fromOneBased(Integer.parseInt(trimmedIndex));
+        } catch (NumberFormatException e) {
+            throw new ParseException(MESSAGE_INVALID_INDEX, e);
+        }
+    }
+
+    /**
+     * Parses arguments containing exactly one index and returns the parsed {@code Index}.
+     *
+     * @param args Raw argument string.
+     * @param messageUsage Usage message of the calling command.
+     * @return Parsed index.
+     * @throws ParseException if the index is missing, duplicated, or invalid.
+     */
+    public static Index parseIndex(String args, String messageUsage) throws ParseException {
+        requireNonNull(args);
+        requireNonNull(messageUsage);
+
+        String trimmedArgs = args.trim();
+
+        if (trimmedArgs.isEmpty()) {
+            throw new ParseException(MESSAGE_MISSING_INDEX + "\n" + messageUsage);
+        }
+
+        String[] tokens = trimmedArgs.split("\\s+");
+        if (tokens.length > 1) {
+            throw new ParseException(MESSAGE_TOO_MANY_ARGUMENTS + "\n" + messageUsage);
+        }
+
+        try {
+            return parseIndex(tokens[0]);
+        } catch (ParseException pe) {
+            throw new ParseException(pe.getMessage() + "\n" + messageUsage);
+        }
+    }
+
+    /**
+     * Parses {@code keywords} into a list of strings.
+     * Leading and trailing whitespaces will be trimmed.
+     * @throws ParseException if the keywords are empty or invalid.
+     */
+    public static List<String> parseKeywords(String keywords) throws ParseException {
+        requireNonNull(keywords);
+        String trimmed = keywords.trim();
+
+        if (trimmed.isEmpty()) {
+            throw new ParseException(MESSAGE_EMPTY_KEYWORDS);
+        }
+
+        if (!trimmed.matches(KEYWORDS_VALIDATION_REGEX)) {
+            throw new ParseException(MESSAGE_INVALID_KEYWORDS);
+        }
+
+        return Arrays.asList(trimmed.split("\\s+"));
     }
 
     /**
@@ -113,7 +183,7 @@ public class ParserUtil {
     }
 
     /**
-     * Parses {@code Collection<String> tags} into a {@code Set<Tag>}.
+     * Parses {@code tele} into a {@code Tele}.
      */
     public static Tele parseTele(String tele) throws ParseException {
         requireNonNull(tele);
@@ -125,12 +195,11 @@ public class ParserUtil {
     }
 
     /**
-     * Parses a {@code String} into an {@code Week.Status}.
+     * Parses a {@code String} into a {@code Week.Status}.
      *
      * @throws ParseException if the input is invalid
      */
-    public static Week.Status parseAttendanceStatus(String status)
-            throws ParseException {
+    public static Week.Status parseAttendanceStatus(String status) throws ParseException {
         requireNonNull(status);
         String trimmed = status.trim().toUpperCase();
 
@@ -144,26 +213,29 @@ public class ParserUtil {
     /**
      * Parses a {@code String} into an {@code Index} representing a week number.
      *
-     * @param input The input string, e.g., "1" for week 1.
+     * @param oneBasedWeek The input string, e.g., "1" for week 1.
      * @return Index corresponding to the week number.
      * @throws ParseException if the input is not a positive integer.
      */
-    public static Index parseWeekIndex(String input) throws ParseException {
-        requireNonNull(input);
-        try {
-            int value = Integer.parseInt(input.trim());
-            if (value <= 0) {
-                throw new ParseException("Week index must be a positive integer.");
-            }
-            return Index.fromOneBased(value);
-        } catch (NumberFormatException e) {
-            throw new ParseException("Week index must be a positive integer.", e);
+    public static Index parseWeekIndex(String oneBasedWeek) throws ParseException {
+        requireNonNull(oneBasedWeek);
+        // For clearer error Messages
+        String trimmedIndex = oneBasedWeek.trim();
+        if (!StringUtil.isNonZeroUnsignedInteger(trimmedIndex)) {
+            throw new ParseException(WeekList.MESSAGE_INVALID_WEEK);
         }
+
+        Index index = parseIndex(oneBasedWeek);
+
+        if (index.getOneBased() > 13) {
+            throw new ParseException(WeekList.MESSAGE_INVALID_WEEK);
+        }
+
+        return index;
     }
 
     /**
      * Parses a {@code String} into a {@code Week.Status}.
-     *
      * Accepts "y" = attended, "a" = absent, "n" = not marked.
      *
      * @param input The input string representing attendance status.
@@ -182,7 +254,7 @@ public class ParserUtil {
         case "N":
             return Week.Status.N;
         default:
-            throw new ParseException("Week status must be 'Y' (attended), 'A' (absent), or 'N' (not marked).");
+            throw new ParseException(Week.MESSAGE_CONSTRAINTS);
         }
     }
     /**
@@ -209,6 +281,7 @@ public class ParserUtil {
             throw new ParseException(MESSAGE_INVALID_PROGRESS);
         }
     }
+
     /**
      * Parses {@code stringAbsenceCount} into an {@code Integer} absence count threshold.
      *
@@ -219,7 +292,7 @@ public class ParserUtil {
         String trimmed = stringAbsenceCount.trim();
 
         if (!trimmed.matches("\\d+")) {
-            throw new ParseException("Absence count must be a non-negative integer.");
+            throw new ParseException(MESSAGE_INVALID_ABSENCE_COUNT);
         }
 
         return Integer.parseInt(trimmed);
