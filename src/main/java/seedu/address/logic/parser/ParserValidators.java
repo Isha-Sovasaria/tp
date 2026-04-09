@@ -59,11 +59,17 @@ public final class ParserValidators {
         assert prefixes.length == prefixStrings.length : "Prefix arrays mismatch";
         assert prefixes.length == detailMessages.length : "Detail message arrays mismatch";
 
+        List<String> missingValuePrefixes = new ArrayList<>();
         for (int i = 0; i < prefixes.length; i++) {
             if (argMultimap.isValueBlank(prefixes[i])) {
-                throw new ParseException(
-                        ParserMessages.missingPrefixValue(prefixStrings[i], detailMessages[i], commandUsage));
+                missingValuePrefixes.add(prefixStrings[i]);
             }
+        }
+
+        if (!missingValuePrefixes.isEmpty()) {
+            throw new ParseException("Missing value for prefix(es): "
+                    + String.join(" ", missingValuePrefixes)
+                    + "\n" + commandUsage);
         }
     }
 
@@ -147,4 +153,3 @@ public final class ParserValidators {
         return missing;
     }
 }
-
