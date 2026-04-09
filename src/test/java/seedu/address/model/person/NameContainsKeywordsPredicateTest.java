@@ -12,6 +12,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.testutil.PersonBuilder;
+
+/**
+ * Contains unit tests for {@code NameContainsKeywordsPredicate}.
+ */
 public class NameContainsKeywordsPredicateTest {
 
     @Test
