@@ -68,7 +68,7 @@ public class UnremarkCommandParserTest {
             ParserMessages.missingPrefixValue(
                 "r/",
                 "Remark index cannot be empty.",
-                UnremarkCommand.MESSAGE_USAGE));
+                "") + "\n" + UnremarkCommand.MESSAGE_USAGE);
     }
 
     @Test

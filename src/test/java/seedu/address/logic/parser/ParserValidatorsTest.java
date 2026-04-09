@@ -58,8 +58,10 @@ public class ParserValidatorsTest {
     public void checkForMissingValues_emptyPrefixValue_throwsFirstParseException() {
         // EP: Prefix present but value is blank
         // Logic: Should catch the first empty prefix encountered in the validation sequence (crs/)
-        assertParseFailure(parser, " crs/ tg/T01",
-                FilterCommandParser.MESSAGE_EMPTY_COURSE_ID);
+        String expectedMessage = ParserMessages.missingPrefixValue("crs/", "Course ID cannot be empty.", "")
+                + "\n" + ParserMessages.missingPrefixValue("tg/", "Tutorial group cannot be empty.", "")
+                + "\n" + USAGE;
+        assertParseFailure(parser, " crs/ tg/", expectedMessage);
     }
 
     @Test
