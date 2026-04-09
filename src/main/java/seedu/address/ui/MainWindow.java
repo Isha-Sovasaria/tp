@@ -301,7 +301,6 @@ public class MainWindow extends UiPart<Stage> {
         personListPanel.getPersonListView().getSelectionModel().select(person);
     }
 
-
     /**
      * Clears the view window and its placeholder.
      */
