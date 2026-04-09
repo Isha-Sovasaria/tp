@@ -49,7 +49,7 @@ public class SampleDataUtil {
                 new int[] {}
             ),
             Progress.NEEDS_ATTENTION);
-            bernice.addRemark(new Remark("Attendance is inconsistent in later weeks", LocalDate.of(2026, 3, 24)));
+        bernice.addRemark(new Remark("Attendance is inconsistent in later weeks", LocalDate.of(2026, 3, 24)));
 
         Person charlotte = new Person(
             new Name("Charlotte Oliveiro"),
