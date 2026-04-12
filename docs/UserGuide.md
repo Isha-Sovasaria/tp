@@ -475,7 +475,7 @@ Alex Yeoh; Student ID: A1234567X; Email: alexyeoh@u.nus.edu; Course ID: CS2103T;
 Remark: Was absent for consultation
 ```
 
-The selected student's record is updated with the new remark, and the Result Box displays a confirmation message. 
+The selected student's record is updated with the new remark, and the Result Box displays a confirmation message.
 To view all existing remarks of a student, go to [View](#view).
 Remarks are shown when you select that student, allowing you to view the newly added remark together with any existing remarks.
 
@@ -502,7 +502,7 @@ unremark INDEX r/REMARK_INDEX
 
 **Expected output:**
 ```
-Deleted remark from Person: 
+Deleted remark from Person:
 Alex Yeoh; Student ID: A1234567X; Email: alexyeoh@u.nus.edu; Course ID: CS2103T; TGroup: T12; Tele: @alexyeoh
 Deleted Remark: Usually well-prepared for tutorials
 ```
@@ -521,7 +521,7 @@ view INDEX
     You can also **click** on any student in the list with your mouse to instantly display their details in the View Window.
 </box>
 
-**Example:** 
+**Example:**
 
 `view 1` — Displays the full details of the 1st student on the currently displayed list.
 
@@ -599,7 +599,7 @@ Note:
 <a name="clear"></a>
 ### Clears all students : `clear`
 
-Deletes all students. Useful for when the semester ends and you want to prep TeachAssist for the next! 
+Deletes all students. Useful for when the semester ends and you want to prep TeachAssist for the next!
 
 Format:
 ```

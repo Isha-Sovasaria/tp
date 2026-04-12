@@ -746,7 +746,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
     * Use case ends.
 * 2c. The remark text is empty or exceeds the allowed length.
     * 2c1. TeachAssist shows an error message.
-    * Use case ends. 
+    * Use case ends.
 
 <delete remark>
 
@@ -1018,7 +1018,7 @@ testers are expected to do more *exploratory* testing.
     3. **Expected behaviour:** The existing Help window is brought to the front/focus. No duplicate window is created.
 
 
-### Find command (`find`) 
+### Find command (`find`)
 
 1. Single-keyword search
 
