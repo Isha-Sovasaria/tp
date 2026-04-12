@@ -338,7 +338,7 @@ Supported attendance statuses:
 marka INDEX wk/WEEK_NUMBER s/STATUS
 ```
 
-* Updates the attendance of student at the specified `INDEX` and `WEEK` to `STATUS`.
+* Updates the attendance of student at the specified `INDEX` and `WEEK_NUMBER` to `STATUS`.
 * The index refers to the index number shown in the currently displayed student list.
 * The index **must be a positive integer** 1, 2, 3, …
 
@@ -362,9 +362,9 @@ Sometimes, a tutorial may not take place for a particular week, for example due 
 
 **Format:** 
 
-`cancelw crs/COURSE_ID tg/TUTORIAL_GROUP wk/WEEK`
+`cancelw crs/COURSE_ID tg/TUTORIAL_GROUP wk/WEEK_NUMBER`
 
-* Cancels the specified `WEEK` for **all students** in the matching `COURSE_ID` and `TUTORIAL_GROUP`.
+* Cancels the specified week for **all students** in the matching `COURSE_ID` and `TUTORIAL_GROUP`.
 * A cancelled week will be reflected in each student’s attendance record.
 * If the week is already cancelled, the command will throw an error message.
 
@@ -393,10 +393,10 @@ Use this command to restore a previously cancelled tutorial week for all student
 
 **Format:** 
 ```
-uncancelw crs/COURSE_ID tg/TUTORIAL_GROUP wk/WEEK
+uncancelw crs/COURSE_ID tg/TUTORIAL_GROUP wk/WEEK_NUMBER
 ```
 
-* Removes the cancelled status for the specified `WEEK`.
+* Removes the cancelled status for the specified week.
 * The week will return to a normal attendance state for all students in the matching course and tutorial group.
 * This affects:
     * Existing students (their week status will be updated).

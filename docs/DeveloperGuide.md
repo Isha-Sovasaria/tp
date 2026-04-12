@@ -376,7 +376,7 @@ Another design consideration was whether to show `NOT_SET` explicitly in the UI.
 
 #### Overview
 
-The `marka` command allows Teaching Assistants (TAs) to update the attendance status of a specific student for a given week.
+The `marka` command allows tutors to record or update a student’s attendance for a specific week. This feature enables per-week attendance tracking instead of aggregate counts, providing finer control over tutorial participation records.
 
 This command operates on a single student identified by index from the currently displayed list and updates the attendance status for one week.
 
