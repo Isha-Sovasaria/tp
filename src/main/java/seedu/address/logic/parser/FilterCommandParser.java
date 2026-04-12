@@ -6,7 +6,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_COURSEID;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PROGRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TGROUP;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import seedu.address.logic.commands.FilterCommand;
@@ -93,7 +92,7 @@ public class FilterCommandParser implements Parser<FilterCommand> {
     private void validateInput(String args, ArgumentMultimap argMultimap) throws ParseException {
         ParserValidators.checkForUnknownPrefixTokens(args, FILTER_PREFIXES, "crs/, tg/, p/, and abs/",
                 FilterCommand.MESSAGE_USAGE);
-        ensureAtLeastOneFilterPresent(argMultimap);
+        ParserValidators.ensureAtLeastOnePrefixPresent(argMultimap, FILTER_PREFIXES, FilterCommand.MESSAGE_USAGE);
         ParserValidators.checkForUnexpectedPreamble(argMultimap, FilterCommand.MESSAGE_USAGE);
         argMultimap.verifyNoDuplicatePrefixesFor(FILTER_PREFIXES);
         ParserValidators.checkForMissingValues(argMultimap, FILTER_PREFIXES,
@@ -104,13 +103,38 @@ public class FilterCommandParser implements Parser<FilterCommand> {
     }
 
     /**
-     * Ensures that the user has provided at least one criteria to filter by.
+     * Parses the CourseId field.
      */
-    private void ensureAtLeastOneFilterPresent(ArgumentMultimap argMultimap) throws ParseException {
-        boolean anyPresent = Arrays.stream(FILTER_PREFIXES)
-                .anyMatch(prefix -> argMultimap.getValue(prefix).isPresent());
-        if (!anyPresent) {
-            throw new ParseException(MESSAGE_NO_FILTERS);
-        }
+    private Optional<CourseId> parseCourseId(ArgumentMultimap argMultimap) throws ParseException {
+        return argMultimap.getValue(PREFIX_COURSEID).isPresent()
+                ? Optional.of(ParserUtil.parseCourseId(argMultimap.getValue(PREFIX_COURSEID).get()))
+                : Optional.empty();
+    }
+
+    /**
+     * Parses the Tutorial Group field.
+     */
+    private Optional<TGroup> parseTGroup(ArgumentMultimap argMultimap) throws ParseException {
+        return argMultimap.getValue(PREFIX_TGROUP).isPresent()
+                ? Optional.of(ParserUtil.parseTGroup(argMultimap.getValue(PREFIX_TGROUP).get()))
+                : Optional.empty();
+    }
+
+    /**
+     * Parses the Progress status field.
+     */
+    private Optional<Progress> parseProgress(ArgumentMultimap argMultimap) throws ParseException {
+        return argMultimap.getValue(PREFIX_PROGRESS).isPresent()
+                ? Optional.of(ParserUtil.parseProgress(argMultimap.getValue(PREFIX_PROGRESS).get()))
+                : Optional.empty();
+    }
+
+    /**
+     * Parses the Absence count field.
+     */
+    private Optional<Integer> parseAbsenceCount(ArgumentMultimap argMultimap) throws ParseException {
+        return argMultimap.getValue(PREFIX_ABSENCE).isPresent()
+                ? Optional.of(ParserUtil.parseAbsenceCount(argMultimap.getValue(PREFIX_ABSENCE).get()))
+                : Optional.empty();
     }
 }
