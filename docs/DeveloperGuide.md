@@ -1648,7 +1648,7 @@ testers are expected to do more *exploratory* testing.
 
     2. **Expected behaviour:** A remark with the text "Participates actively in class" and the current date is added to the student at index 1. Success message shown: `"Added remark to Person: <student details> Remark: Participates actively in class"`.
 
-2. Adding a remark with invalid input
+2. Adding a remark with missing prefix
 
     1. **Test case:** `remark 1 txt/` (empty remark text after prefix)
 
@@ -1658,7 +1658,7 @@ testers are expected to do more *exploratory* testing.
 
     4. **Expected behaviour:** Command rejected with an error message showing the correct usage format.
 
-3. Adding a remark to a non-existent student
+3. Adding a remark with missing remark text
 
     1. **Test case:** `remark 999 txt/Some remark` (where index 999 exceeds the displayed list size)
 
