@@ -140,7 +140,7 @@ You’re all set! From here, head to the Features section to learn what TeachAss
 <a name="help"></a>
 ### Viewing help : `help`
 
-If you need a quick reminder of the command syntax or prefixes, se the `help` command to open a dedicated Help Window.
+Lost? Use `help` to open the Help Window for a quick overview of all available commands and a link to this guide.
 
 **Format:**
 ```
@@ -176,7 +176,7 @@ list
 <a name="add"></a>
 ### Adding a student: `add`
 
-Use the `add` command to create an entry of a student with their key details, such as name, student ID, course, and tutorial group. 
+Got a new student to take care of? Use `add` to register them in TeachAssist with their key details.
 
 **Format:**
 ```
@@ -214,7 +214,7 @@ When a student is added successfully, you will receive a confirmation message:
 <a name="find"></a>
 ### Finding students by name: `find`
 
-Forgetting a student’s full name? You can use the find command to instantly search for students using the beginning of any word in their name.
+Search for students by name with `find` — you only need the start of any word in their name!
 
 **Format:**
 `find KEYWORD [MORE_KEYWORDS]...`
@@ -298,7 +298,7 @@ The student list updates instantly. The Result Box will display the total count:
 <a name="edit"></a>
 ### Editing a student: `edit`
 
-If there are changes to a student's information during the sem, use the `edit` command to edit the student's details accordingly.
+If there are changes to a student's information mid-semester, use the `edit` to update student's details accordingly.
 
 **Format:**
 ```
@@ -324,7 +324,7 @@ When the edit is successful, you will receive the following message:
 ### Updating students' attendance
 
 
-TeachAssist provides yopu with three commands for attendance management: `marka` to record an individual student’s attendance for a specific week, `cancelw` to cancel a tutorial week for an entire class, and `uncancelw` to restore a previously cancelled week.
+TeachAssist gives you three commands for attendance: `marka` for individual students, `cancelw` cancelling classes on holidays, and `uncancelw` if you need to undo that.
 
 <box type="info">
   
@@ -335,7 +335,7 @@ TeachAssist provides yopu with three commands for attendance management: `marka`
 <a name="mark-attendance"></a>
 #### Marking a student's attendance: `marka`
 
-Use this command to update the attendance of a specific student for a specific week.
+Used to record the attendance of a specific student for a specific week.
 
 Supported attendance statuses:
 - `y` for present
@@ -367,7 +367,7 @@ The following shows week 3 marked as absent(red) for Alex Yeoh.
 <a name="cancel-week"></a>
 #### Cancelling a tutorial's week: `cancelw`
 
-If a tutorial does not take place for a certain week, such as a public holiday or a planned cancellation, use `cancelw` to mark that week as cancelled for all students in the specified course and tutorial group.
+Mark a whole week as cancelled for an entire class — handy for public holidays or planned cancellations.
 
 **Format:**
 
@@ -375,6 +375,7 @@ If a tutorial does not take place for a certain week, such as a public holiday o
 
 * Cancels the specified week for **all students** in the matching `COURSE_ID` and `TUTORIAL_GROUP`.
 * A cancelled week will be reflected in each student’s attendance record.
+* A cancelled week will not be counted as an absence.
 * If the week is already cancelled, the command will throw an error message.
 
 <box type="info">
@@ -459,7 +460,7 @@ and a red "At Risk" label.
 <a name="remark"></a>
 #### Adding a remark : `remark`
 
-To record an important note about a student, use the `remark` command to attach a remark directly to that student’s record. Keep track of class participation, proficiency in topics, or just general remarks of a student!
+Attach important notes to a student's record with `remark` — great for tracking participation, follow-ups, or just general remarks!
 
 **Format:**
 ```
@@ -491,7 +492,7 @@ To view all existing remarks of a student, go to [View](#view).
 <a name="unremark"></a>
 #### Removing a remark : `unremark`
 
-Over time, some remarks may become outdated, unnecessary, or incorrect. The `unremark` feature lets you delete a specific remark from a student’s record when it is no longer useful.
+Over time, some remarks may be outdated or irrelevant. Use `unremark` to delete a specific remark from a student’s record when it is no longer useful.
 
 **Format:**
 
@@ -520,7 +521,7 @@ If successful, the confirmation message will be shown in the Result Box and the 
 <a name="view"></a>
 ### Viewing a student: `view`
 
-When you want to see a student's full details, including their past remarks, you can use the `view` command.
+Pull up a student's full details, including all their past remarks, with `view`.
 
 **Format:**
 ```
@@ -546,12 +547,12 @@ The **View Window** on the right side of the application updates to show the stu
 <a name="delete"></a>
 ### Deleting a student: `delete`
 
-If you need to permanently remove a student record, TeachAssist lets you do this in two ways. The usual method is to delete by index when the student is already visible in the current list. If needed, you can also delete by the student’s stored details.
+Permanently remove a student record from TeachAssist by their current index for speed, or by their details for precision.
 
 <a name="deletebyindex"></a>
 #### Delete by index
 
-Use this when the student is already shown in the current list and you want the fastest way to remove them.
+The quick option! Best when the student is already visible in the current list.
 
 **Format:**
 ```
@@ -611,7 +612,7 @@ delete id/STUDENT_ID crs/COURSE_ID tg/TUTORIAL_GROUP
 <a name="clear"></a>
 ### Clears all students : `clear`
 
-Deletes all students. Useful for when the semester ends and you want to prep TeachAssist for the next!
+Wipe all student records at once with `clear`. Useful at the end of a semester when preparing for the next!
 
 Format:
 ```
