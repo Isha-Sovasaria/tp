@@ -732,7 +732,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 2b. The specified progress status is invalid.
     * 2b1. TeachAssist informs the user of the valid progress statuses.
     * Use case ends.
- 
+
 <add remark>
 **Use Case: UC06 – Add remark to student**<br>
 **Actor:** User<br>
@@ -753,7 +753,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
     * Use case ends.
 * 2c. The remark text is empty or exceeds the allowed length.
     * 2c1. TeachAssist shows an error message.
-    * Use case ends. 
+    * Use case ends.
 
 <delete remark>
 
@@ -1008,7 +1008,7 @@ testers are expected to do more *exploratory* testing.
     3. **Expected behaviour:** The existing Help window is brought to the front/focus. No duplicate window is created.
 
 
-### Find command (`find`) 
+### Find command (`find`)
 
 1. Single-keyword search
 
@@ -1040,7 +1040,7 @@ testers are expected to do more *exploratory* testing.
 
     2. **Expected behaviour:** Command rejected with error message: `"Keywords should contain alphabetic characters separated by spaces only."` followed by the `find` command usage.
 
-### Filter command (`filter`) 
+### Filter command (`filter`)
 
 1. Single criterion filtering
 
