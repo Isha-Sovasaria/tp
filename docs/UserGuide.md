@@ -38,9 +38,10 @@ And the best part? No technical expertise needed—just basic computer skills li
   - [Clearing all students: `clear`](#clear)
   - [Exiting the app: `exit`](#exit)
   - [Saving the data](#saving-the-data)
-  - [Known Issues](#known-issues)
+  - [Editing the data](#editing-the-data)
 - [Command Summary](#command-summary)
 - [Parameter Summary](#parameter-summary)
+- [Known Issues](#known-issues)
 - [FAQ](#faq)
 - [Glossary](#glossary)
 ---
@@ -95,7 +96,7 @@ Can't wait to get TeachAssist up and running? Let’s begin!
    After a few seconds, the GUI should appear, similar to the screenshot below.
    Notice that the app starts with some sample data for you to try out the commands.
 
-   ![Ui](images/Ui.png)
+    <img src="images/UiAnnotated.png" alt="help window" width="800">
 
 6. **Try entering a command in the command box.**
    A good place to start is help. Type it in and press Enter to open the help window and view the list of available commands.
@@ -104,6 +105,7 @@ Can't wait to get TeachAssist up and running? Let’s begin!
    - `help` : Opens the help window.
    - `list` : Lists all students.
    - `delete 3` : Deletes the student at index `3` in the current list.
+     - Upon request for confirmation, enter `yes` to confirm deletetion.
    - `add n/John Doe id/A0123456X e/johnd@u.nus.edu crs/CS2103T tg/T01 tel/@johndoe` : Adds a student named `John Doe`.
    - `clear` : Deletes all students.
    - `exit` : Exits the app.
@@ -138,7 +140,7 @@ You’re all set! From here, head to the Features section to learn what TeachAss
 <a name="help"></a>
 ### Viewing help : `help`
 
-Need a quick reminder of the command syntax or prefixes? Use the `help` command to open a dedicated Help Window.
+Lost? Use `help` to open the Help Window for a quick overview of all available commands and a link to this guide.
 
 **Format:**
 ```
@@ -154,7 +156,7 @@ The main TeachAssist window remains active in the background.
 
 <box type="tip">
 
-Tip:
+**Tip:**
 Press `F1` to open the Help Window. On some Mac keyboards, you may need to press `fn + F1`.
 </box>
 
@@ -174,7 +176,7 @@ list
 <a name="add"></a>
 ### Adding a student: `add`
 
-Use the `add` command to create an entry of a student with their key details, such as name, student ID, course, and tutorial group. This is useful when setting up your class list at the start of the semester or when adding students later on.
+Got a new student to take care of? Use `add` to register them in TeachAssist with their key details.
 
 **Format:**
 ```
@@ -187,16 +189,18 @@ It must be noted that when entering parameters, they should not be blank.
 * `STUDENT_ID` should start with an 'A', followed by 7 digits, ending with a letter.
 * `COURSE_ID` should be alphanumeric, with no spaces.
 * `TUTORIAL_GROUP` should be alphanumeric, with no spaces.
-* `EMAIL` should only end with valid NUS domains ("@u.nus.edu", "@u.duke.nus.edu", "@u.yale-nus.edu.sg"). The local part before the '@' should be alphanumeric and can contain these special characters: " . ", " _ ", " - ", without any spaces.
-* `TELEGRAM_USERNAME` should only contain alphanumeric characters and underscores, with no spaces and an optional '@' as a starting character.
+* `EMAIL` is optional and should only end with valid NUS domains ("@u.nus.edu", "@u.duke.nus.edu", "@u.yale-nus.edu.sg"). The local part before the '@' should be alphanumeric and can contain these special characters: " . ", " _ ", " - ", without any spaces.
+* `TELEGRAM_USERNAME` is optional and should only contain alphanumeric characters and underscores, with no spaces and an optional '@' as a starting character.
 
 <box type="warning">
 
-Warning:
+**Warning:**
+
 What makes an entry a duplicate?
 
 * When a student that already exists in TeachAssist is being added (same `STUDENT_ID`, `EMAIL` or `TELEGRAM_USERNAME`),
  they must be of a different `COURSE_ID` and `TUTORIAL_GROUP`.
+</box>
 
 **Examples:**
 ```
@@ -210,7 +214,7 @@ When a student is added successfully, you will receive a confirmation message:
 <a name="find"></a>
 ### Finding students by name: `find`
 
-Forgetting a student’s full name? You can use the find command to instantly search for students using the beginning of any word in their name.
+Search for students by name with `find` — you only need the start of any word in their name!
 
 **Format:**
 `find KEYWORD [MORE_KEYWORDS]...`
@@ -223,7 +227,9 @@ Forgetting a student’s full name? You can use the find command to instantly se
 * Only the name field is searched
 
 <box type="warning">
-Keywords must contain only alphabetic characters (A–Z). Using numbers or symbols (e.g., `find A123`) will result in an error.
+
+**Warning:**
+Keywords must contain only **alphabetic characters (A–Z)**. Using numbers or symbols (e.g., `find A123`) will result in an error.
 </box>
 
 **Example:**
@@ -235,7 +241,8 @@ Keywords must contain only alphabetic characters (A–Z). Using numbers or symbo
 The student list updates to show only matching records, and the Result Box displays the number of matches.
 
 <box type="info">
-Note:
+  
+**Note:**
     The `find` command searches through the entire stored student list and replaces any existing filter — it does not apply on top of a previously displayed (filtered) list.
 </box>
 
@@ -252,17 +259,19 @@ filter [crs/COURSE_ID] [tg/TUTORIAL_GROUP] [p/PROGRESS] [abs/ABSENCE_COUNT]`
 ```
 
 <box type="warning">
-Warning:
+  
+**Warning:**
     At least one filter parameter must be provided; using no parameters will result in an error.
 </box>
 
 **How it works:**
 * Course ID (`crs/`) and tutorial group (`tg/`) are matched case-insensitively.
-* Progress (`p/`) must be one of the following(case-insensitive): `on_track`, `needs_attention`, `at_risk`, or `clear` (alias `not_set`).
+* Progress (`p/`) must be one of the following(case-insensitive): `on_track`, `needs_attention`, `at_risk`, or `not_set`.
 * Absence count (`abs/`) matches students whose absence count is greater than or equal to the provided number.
 * When you use multiple filters at once, a student must satisfy every provided filter to be included in the results.
 <box type="info">
-Note:
+
+**Note:**
     The `filter` command applies to the entire stored student list and replaces any existing filter — it does not apply on top of a previously displayed (filtered) list.
 </box>
 
@@ -278,17 +287,18 @@ Examples:
 
 The student list updates instantly. The Result Box will display the total count:
 
-`There are 5 students matching this filter.`
+> There are 5 students matching this filter.
 
 <box type="tip">
-Tip:
+  
+**Tip:**
     If a filter returns no results, verify you used the correct course ID/tutor group format and valid progress values; run `help` or check the Update Progress section for exact progress tokens.
 </box>
 
 <a name="edit"></a>
 ### Editing a student: `edit`
 
-If there are changes to a student's information during the sem, use the `edit` command to edit the student's details accordingly.
+If there are changes to a student's information mid-semester, use the `edit` to update student's details accordingly.
 
 **Format:**
 ```
@@ -313,20 +323,19 @@ When the edit is successful, you will receive the following message:
 <a name="attendance"></a>
 ### Updating students' attendance
 
-Now that you have finally set up your student list here comes the part you can never avoid: keeping attendance records. 
-That maybe done by marking attendance for a particular week or canceling a tutorial session for the whole class.
-TeachAssist provides three commands to solve all you needs. Use `marka` to update an individual student's attendance for a specific week, 
-`cancelw` to cancel a tutorial week for an entire class, and `uncancelw` to restore a previously cancelled week.
+
+TeachAssist gives you three commands for attendance: `marka` for individual students, `cancelw` cancelling classes on holidays, and `uncancelw` if you need to undo that.
 
 <box type="info">
-Note:
+  
+**Note:**
     In line with the NUS academic calendar, each student added to TeachAssist starts with a default attendance record covering 13 teaching weeks. These weekly records can then be updated, cancelled, or restored using the attendance commands below.
 </box>
 
 <a name="mark-attendance"></a>
 #### Marking a student's attendance: `marka`
 
-Use this command to update the attendance of a specific student for a specific week.
+Used to record the attendance of a specific student for a specific week.
 
 Supported attendance statuses:
 - `y` for present
@@ -345,20 +354,20 @@ marka INDEX wk/WEEK_NUMBER s/STATUS
 
 **Examples**:
 
-- `marka 1 wk/3 s/y` - marks the attendance of the 1st student's attendance in week 3 as present -> Green.
+- `marka 1 wk/3 s/a` - marks the attendance of the 1st student's attendance in week 3 as absent -> Red.
 
 **Expected output:**
 
 The selected student's attendance record is updated immediately in the student list, and the corresponding week is shown with the updated attendance status.
-mark
 
-The following shows week 3 marked as present(green) for Alex Tan, week 6 marked as absent(red) for Bernice Yu, and unmarked(default) for everything else.
-<img src="images/markattendancesuccess.png" alt="marka success" width="700">
+The following shows week 3 marked as absent(red) for Alex Yeoh.
+
+<img src="images/markattendancesuccess.png" alt="marka success" width="500">
 
 <a name="cancel-week"></a>
 #### Cancelling a tutorial's week: `cancelw`
 
-Sometimes, a tutorial may not take place for a particular week, for example due to a public holiday, a make-up arrangement, or a planned cancellation. In such cases, use the `cancelw` command to mark that week as cancelled for all students in a specific course and tutorial group.
+Mark a whole week as cancelled for an entire class — handy for public holidays or planned cancellations.
 
 **Format:**
 
@@ -366,10 +375,12 @@ Sometimes, a tutorial may not take place for a particular week, for example due 
 
 * Cancels the specified week for **all students** in the matching `COURSE_ID` and `TUTORIAL_GROUP`.
 * A cancelled week will be reflected in each student’s attendance record.
+* A cancelled week will not be counted as an absence.
 * If the week is already cancelled, the command will throw an error message.
 
 <box type="info">
-Note:
+  
+**Note:**
     The cancellation is applied to:
         - All existing students in that course and tutorial group.
         - All future students added to the same course and tutorial group.
@@ -381,15 +392,15 @@ Note:
 
 **Expected output:**
 
-All students in CS2103T, tutorial T02 will show week 5 as cancelled (represented by an X) in their attendance records.
+All students in CS2103T, tutorial T12 will show week 5 as cancelled (represented by an X) in their attendance records, all other students remain unchanged.
 
-<img src="images/cancelweeksuccess.png" alt="cancelw success" width="700">
+<img src="images/cancelweeksuccess.png" alt="cancelw success" width="500">
 
 
 <a name="uncancel-week"></a>
 #### Uncancelling a tutorial's week: `uncancelw`
 
-Use this command to restore a previously cancelled tutorial week for all students in a specific course and tutorial group.
+Use `uncancelw` to restore a previously cancelled tutorial week for all students in a specific course and tutorial group.
 
 **Format:**
 ```
@@ -428,27 +439,28 @@ updateprogress INDEX p/PROGRESS
 * Progress is case-insensitive, so values such as `ON_TRACK` and `on_track` are both accepted.
 
 <box type="tip">
-Tip:
+  
+**Tip:**
     To remove a student's progress tag, use `not_set`.
 </box>
 
 **Examples:**
 
-- `updateprogress 1 p/not_set` - clear the 1st student's progress by setting it to  `not_set`
 - `updateprogress 2 p/at_risk` - set the 2nd student's progress to `at_risk`
-- `updateprogress 3 p/needs_attention` - set the 3rd student's progress to `needs_attention`
 
 **Expected output:**
 
-<img src="images/updateprogress.png" alt="updateprogress success" width="700">
-
+If progress has been successfully updated, you should see the success message:
+> Updated progress for student: Bernice Yu; Student ID: A7654321X; Email: berniceyu@u.nus.edu; Course ID: CS2103T; TGroup: T12; Tele: @berniceyu.
+> New progress: AT_RISK
+and a red "At Risk" label.
 
 ### Remarks
 
 <a name="remark"></a>
 #### Adding a remark : `remark`
 
-Need to record an important note about a student? Use the `remark` command to attach a remark directly to that student’s record! Keep track of class participation, proficiency in topics, or just general remarks of a student!
+Attach important notes to a student's record with `remark` — great for tracking participation, follow-ups, or just general remarks!
 
 **Format:**
 ```
@@ -467,21 +479,20 @@ remark INDEX txt/REMARK
 - `remark 1 txt/Was absent for consultation.`
 
 **Expected output:**
-```
-Added remark to Person:
-Alex Yeoh; Student ID: A1234567X; Email: alexyeoh@u.nus.edu; Course ID: CS2103T; TGroup: T12; Tele: @alexyeoh
-Remark: Was absent for consultation
-```
 
-The selected student's record is updated with the new remark, and the Result Box displays a confirmation message.
+If successful, the selected student's record is updated with the new remark, and the Result Box displays a confirmation message.
+> Added remark to Person:
+> Alex Yeoh; Student ID: A1234567X; Email: alexyeoh@u.nus.edu; Course ID: CS2103T; TGroup: T12; Tele: @alexyeoh
+> Remark: Was absent for consultation
+
+
 To view all existing remarks of a student, go to [View](#view).
-Remarks are shown when you select that student, allowing you to view the newly added remark together with any existing remarks.
 
 
 <a name="unremark"></a>
 #### Removing a remark : `unremark`
 
-Over time, some remarks may become outdated, unnecessary, or incorrect. The `unremark` feature lets you delete a specific remark from a student’s record when it is no longer useful.
+Over time, some remarks may be outdated or irrelevant. Use `unremark` to delete a specific remark from a student’s record when it is no longer useful.
 
 **Format:**
 
@@ -499,23 +510,26 @@ unremark INDEX r/REMARK_INDEX
 - `unremark 1 r/2` - removes the 2nd remark for the 1st student on the list.
 
 **Expected output:**
-```
-Deleted remark from Person:
-Alex Yeoh; Student ID: A1234567X; Email: alexyeoh@u.nus.edu; Course ID: CS2103T; TGroup: T12; Tele: @alexyeoh
-Deleted Remark: Usually well-prepared for tutorials
-```
+If successful, the confirmation message will be shown in the Result Box and the remark will be deleted permanently.
+
+> Deleted remark from Person:
+> Alex Yeoh; Student ID: A1234567X; Email: alexyeoh@u.nus.edu; Course ID: CS2103T; TGroup: T12; Tele: @alexyeoh
+> Deleted Remark: Usually well-prepared for tutorials
+
 
 
 <a name="view"></a>
 ### Viewing a student: `view`
 
-When you want to see a student's full details, including their past remarks, you can use the `view` command.
+Pull up a student's full details, including all their past remarks, with `view`.
 
 **Format:**
 ```
 view INDEX
 ```
-<box type="info" name="Note">
+<box type="tip">
+
+**Tip:**
     You can also **click** on any student in the list with your mouse to instantly display their details in the View Window.
 </box>
 
@@ -525,7 +539,7 @@ view INDEX
 
 **Expected Output:**
 
-The **View Window** on the right side of the application updates to show the student's past remarks in a tabular format .
+The **View Window** on the right side of the application updates to show the student's past remarks in a tabular format.
 
 <img src="images/viewsuccess.png" alt="view success" width="900">
 
@@ -533,12 +547,12 @@ The **View Window** on the right side of the application updates to show the stu
 <a name="delete"></a>
 ### Deleting a student: `delete`
 
-Need to permanently remove a student record? TeachAssist lets you do this in two ways. The usual method is to delete by index when the student is already visible in the current list. If needed, you can also delete by the student’s stored details.
+Permanently remove a student record from TeachAssist by their current index for speed, or by their details for precision.
 
 <a name="deletebyindex"></a>
 #### Delete by index
 
-Use this when the student is already shown in the current list and you want the fastest way to remove them.
+The quick option! Best when the student is already visible in the current list.
 
 **Format:**
 ```
@@ -553,9 +567,9 @@ delete INDEX
 
 After you enter a valid `delete` command, TeachAssist will show a confirmation message.
 
-You should see this confirmation message shown after a valid `delete` command:
+You should see a similar confirmation message shown after a valid `delete` command:
 
-<img src="images/deleteconfirmation.png" alt="delete confirmation" width="700">
+> Are you sure you want to delete Alex Yeoh? Type 'yes' to confirm or 'no' to cancel.
 
 Enter `yes` to proceed with the deletion, or `no` to cancel it.
 
@@ -568,7 +582,7 @@ Enter `yes` to proceed with the deletion, or `no` to cancel it.
 
 If the deletion is confirmed, TeachAssist will display a success message so you know the student has been successfully removed.
 
-<img src="images/deleteconfirmation.png" alt="delete confirmation" width="700">
+> Deleted Person: Alex Yeoh; Student ID: A0123456X; Email: alexyeoh@u.nus.edu; Course ID: CS2103T; TGroup: T12; Tele: @alexyeoh
 
 Did you get it? If you did, congrats!
 
@@ -590,14 +604,15 @@ delete id/STUDENT_ID crs/COURSE_ID tg/TUTORIAL_GROUP
 - `delete id/A1234567X crs/CS2103T tg/T01` followed by `yes` - deletes the student with student ID `A1234567X`, course `CS2103T`, and tutorial group `T01`.
 
 <box type="info">
-Note:
+
+**Note:**
     This method searches the entire TeachAssist list, not just the students currently displayed. This means a student can still be deleted even if they are currently hidden by a filter.
 </box>
 
 <a name="clear"></a>
 ### Clears all students : `clear`
 
-Deletes all students. Useful for when the semester ends and you want to prep TeachAssist for the next!
+Wipe all student records at once with `clear`. Useful at the end of a semester when preparing for the next!
 
 Format:
 ```
@@ -616,11 +631,22 @@ exit
 
 ### Saving the data
 
-TeachAssist data are saved in the hard disk automatically after any command that changes the data. There is no need to save manually.
+TeachAssist data are saved in the hard disk automatically after any command that changes the data. There is no need to save manually or when you exit the app.
+
+### Editing the data
+
+TeachAssist data are saved automatically as a JSON file [JAR file location]/data/addressbook.json. Advanced users are welcome to update data directly by editing that data file.
+
+<box type="warning">
+
+**Warning:**
+If your changes to the data file makes its format invalid, TeachAssist will discard all data and start with an empty data file at the next run. Hence, it is recommended to take a backup of the file before editing it.
+Furthermore, certain edits can cause the TeachAssist to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+</box>
 
 ## Command Summary
 
-Action | Format, Examples
+Action | Format
 -------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Help** | `help`
 **List** | `list`
@@ -635,7 +661,7 @@ Action | Format, Examples
 **Remark** | `remark INDEX txt/REMARK`<br> e.g., `remark 1 txt/Participates actively in class!`
 **Unremark** | `unremark INDEX r/REMARK_INDEX`<br> e.g., `unremark 1 r/2`
 **View** | `view INDEX`<br> e.g., `view 1`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`<br> or `delete id/STUDENT_ID crs/COURSE_ID tg/TUTORIAL_GROUP`<br> e.g., `delete id/A1234567X crs/CS2103T tg/T01`
+**Delete** | By index: `delete INDEX`<br>e.g., `delete 3`<br><br>By student details: `delete id/STUDENT_ID crs/COURSE_ID tg/TUTORIAL_GROUP`<br>e.g., `delete id/A1234567X crs/CS2103T tg/T01`
 **Clear** | `clear`
 **Exit** | `exit`
 
@@ -658,17 +684,14 @@ Parameter             | Prefix  | Constraints                                   
 **REMARK_INDEX**      | `r/`    | Positive integer; must not exceed the number of remarks the student currently has.                                             | `1`, `2`
 
 --------------------------------------------------------------------------------------------------------------------
-### Known issues
+
+## Known issues
 1. Cancelled-week recovery is transient: When a week is cancelled, the app stores previous per-student attendance statuses in memory to allow in-session recovery. However, this transient state is not persisted to disk. As a result, after the application is closed and restarted, recovering the pre-cancellation Y/A/N statuses may not be possible. Consider this when cancelling weeks; if you need to retain historical statuses across restarts, avoid relying on the transient recovery mechanism.
 2. If you minimize the Help Window and then run the help command (or use the Help menu, or the keyboard shortcut F1) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
 
+--------------------------------------------------------------------------------------------------------------------
+
 ## FAQ
-
-**Q: Do I need to enter parameters in a fixed order?**
-Excluding index parameters without the '/' prefix. No. For commands with prefixes such as add and filter, parameters can be entered in any order as long as all required fields are provided.
-
-**Q: Why did `delete 1` remove a different student than I expected?**
-The index refers to the *currently displayed* list. If you previously ran `find` or `filter`, the list may be a subset of all students. Run `list` first to see every student, then use the correct index.
 
 **Q: How do I transfer my data to another computer?**
 Install TeachAssist on the other computer and replace the new `data/addressbook.json` file with the one from your previous TeachAssist home folder.
@@ -676,24 +699,11 @@ Install TeachAssist on the other computer and replace the new `data/addressbook.
 **Q: I accidentally ran `clear` — can I undo it?**
 No. TeachAssist does not support an undo feature. The `clear` command permanently removes all student records. Consider backing up `data/addressbook.json` before running destructive commands.
 
-**Q: Can two students have the same Student ID?**
-Yes, as long as they differ in **Course ID** or **Tutorial Group**. TeachAssist treats the combination of Student ID + Course ID + Tutorial Group as the unique identifier for a student record. This means the same student (e.g., `A0123456X`) can appear once for CS2103T/T01 and once for CS2101/T08.
-
-**Q: Why does `filter` show no results even though I have matching students?**
-Double-check the values you entered. Course ID and Tutorial Group are case-insensitive, but Progress must be one of the exact tokens: `on_track`, `needs_attention`, `at_risk`, or `not_set`. Also note that `abs/` filters by *minimum* absences — `filter abs/3` shows students with 3 **or more** absences, not exactly 3.
-
 **Q: Does `find` or `filter` change my data?**
 No. Both commands only change which students are *displayed*. Your underlying data is never modified. Run `list` to go back to the full list.
 
 **Q: Why can't I mark attendance for week 14?**
 TeachAssist follows the NUS 13-week teaching schedule (weeks 1–13). Week numbers outside this range are not accepted.
-                       
-**Q: Why doesn't my uncancel week return my status before i cancelled that week?**
-Because recovering cancelled status functionality is transient, i.e if you close the app you can
-no longer recover your cancelled status.
-
-**Q: What happens if I close TeachAssist without running `exit`?**
-Your data is saved automatically after every command that changes it, so closing the window directly (e.g., clicking the × button) will not cause data loss.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -701,18 +711,6 @@ Your data is saved automatically after every command that changes it, so closing
 
 Term | Meaning
 -----|--------
-**CLI (Command Line Interface)** | A text-based way to interact with the application by typing commands into the command box, as opposed to clicking buttons.
-**GUI (Graphical User Interface)** | The visual part of TeachAssist — the windows, student cards, attendance bars, and buttons you see on screen.
-**Command Box** | The text field at the top of the TeachAssist window where you type commands.
-**Result Box** | The area directly below the Command Box that displays feedback messages after each command (e.g., success or error messages).
-**View Window** | The panel on the right side of the TeachAssist window that shows a selected student's detailed information and remarks.
-**Index** | The number shown to the left of each student in the currently displayed list. Used by commands like `delete`, `edit`, `view`, and `markattendance` to identify a student.
 **Prefix** | A short tag ending with `/` that tells TeachAssist which parameter you are providing (e.g., `n/` for name, `crs/` for course ID). See the [Parameter Summary](#parameter-summary) for the full list.
-**Student ID** | The NUS matriculation number (e.g., `A0123456X`). Starts with `A`, followed by 7 digits, ending with a letter.
-**Course ID** | The NUS module code (e.g., `CS2103T`, `MA1521`). Must be alphanumeric with no spaces.
-**Tutorial Group** | The class section identifier within a course (e.g., `T01`, `B03`). Must be alphanumeric.
-**Progress** | A label indicating a student's current academic standing. One of: `on_track`, `needs_attention`, `at_risk`, or `not_set`.
-**Absence Count** | The total number of weeks a student has been marked absent (`a`). Ranges from 0 to 13.
-**Remark** | A free-text note (up to 100 characters) attached to a student's record, automatically tagged with the date it was added.
 **JSON (JavaScript Object Notation)** | The file format TeachAssist uses to store your data (`data/addressbook.json`). It is a human-readable text format.
 **Home Folder** | The folder where you placed `TeachAssist.jar`. TeachAssist creates a `data/` subfolder here to store your student data.
