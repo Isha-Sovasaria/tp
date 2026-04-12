@@ -251,12 +251,12 @@ This is useful in TeachAssist because student records are identified by student-
 
 TeachAssist supports the following delete modes:
 
-- **Delete by displayed index**  
-  The user deletes a student using the index shown in the current displayed student list.  
+- **Delete by displayed index**
+  The user deletes a student using the index shown in the current displayed student list.
   Example: `delete 1`
 
-- **Delete by exact student details**  
-  The user deletes a student by specifying the student’s `StudentId`, `CourseId`, and `TGroup`.  
+- **Delete by exact student details**
+  The user deletes a student by specifying the student’s `StudentId`, `CourseId`, and `TGroup`.
   Example: `delete id/A1234567X crs/CS2103T tg/T01`
 
 This identity-based deletion mode is useful when the user wants to target a specific student directly, rather than relying on the current displayed index.
@@ -546,7 +546,7 @@ In the model, a remark is represented as a dedicated `Remark` object rather than
 
 This design allows each remark to carry basic metadata in addition to its content. In the current implementation, the creation date is automatically assigned using `LocalDate.now()` when the command is parsed. This means the user only provides the text of the remark, while the system records the date implicitly.
 
-- Remarks are stored in each `Person` as a `List<Remark>`. 
+- Remarks are stored in each `Person` as a `List<Remark>`.
 - In storage, `JsonAdaptedPerson` stores `remarks` as a `List<JsonAdaptedRemark>`.
 - Each `JsonAdaptedRemark` contains a `text` field and a `date` field.
 - During deserialization, each adapted remark is converted back into a model-level `Remark` object and reattached to the corresponding person.
@@ -555,7 +555,7 @@ This design allows each remark to carry basic metadata in addition to its conten
 
 When `RemarkCommand#execute` is called, the command first retrieves the currently filtered person list from the model. It checks whether the provided index is within bounds; if not, it throws a `CommandException` using `Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX`. Otherwise, it retrieves the target `Person` from the displayed list, constructs a copy of that person, adds the new remark to the copied person, and updates the model using `model.setPerson(personToEdit, editedPerson)`. A success message is then returned to the user.
 
-An important implementation detail is that the command does not mutate the original `Person` object in place. Instead, it works on a copied `Person` instance and replaces the old person in the model using `setPerson(...)`. This makes the update explicit and aligns the remark feature with the application's general update pattern. 
+An important implementation detail is that the command does not mutate the original `Person` object in place. Instead, it works on a copied `Person` instance and replaces the old person in the model using `setPerson(...)`. This makes the update explicit and aligns the remark feature with the application's general update pattern.
 
 The following sequence diagram provides a simplified view of how the updated address book state is persisted through the storage layer after execution of the `remark` command.
 
@@ -613,7 +613,7 @@ TeachAssist is specifically optimized for a distinct niche of academic administr
 * Technical Proficiency: Reasonably comfortable with Command Line Interface (CLI) applications and values the precision of text-based input.
 * Performance: A fast typist who finds traditional Mouse/GUI interactions cumbersome and "slow" for repetitive data entry.
 
-**Value proposition**: 
+**Value proposition**:
 TeachAssist provides a high-speed, structured student management system that bridges the gap between disorganized spreadsheets and overly complex enterprise software. By utilizing a typing-based interface, it allows TAs to execute administrative tasks—such as updating student details or logging consultation notes—significantly faster than a typical mouse-driven application.
 
 
