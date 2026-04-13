@@ -22,14 +22,12 @@ public class UnremarkCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Deleted a remark for a person in the address book. "
             + "Parameters: "
-            + "STUDENT INDEX (must be a valid index in the list) "
+            + "INDEX (must be a valid index in the list) "
             + PREFIX_UNREMARK + "REMARK_INDEX (must be a positive integer) \n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_UNREMARK + "1 \n";
 
     public static final String MESSAGE_DELETE_REMARKS_SUCCESS = "Deleted remark from Person: \n%1$s";
-
-    // public static final String MESSAGE_DELETE_REMARKS_FAILURE = "Failed to delete remark from Person: %1$s";
 
     public static final String MESSAGE_INVALID_REMARK_INDEX = "The remark index provided is invalid.";
 
@@ -39,8 +37,8 @@ public class UnremarkCommand extends Command {
     /**
      * Creates an UnremarkCommand to delete a remark from a person by displayed index.
      *
-     * @param targetIndex
-     * @param remarkIndex
+     * @param targetIndex Index of the person in the filtered person list.
+     * @param remarkIndex Index of the remark to delete.
      */
     public UnremarkCommand(Index targetIndex, Index remarkIndex) {
         requireNonNull(targetIndex);
@@ -79,10 +77,9 @@ public class UnremarkCommand extends Command {
         if (other == this) {
             return true;
         }
-        if (!(other instanceof UnremarkCommand)) {
+        if (!(other instanceof UnremarkCommand otherCommand)) {
             return false;
         }
-        UnremarkCommand otherCommand = (UnremarkCommand) other;
         return targetIndex.equals(otherCommand.targetIndex)
                 && remarkIndex.equals(otherCommand.remarkIndex);
     }

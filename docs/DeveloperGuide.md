@@ -29,6 +29,10 @@ This project was forked from [se-edu/addressbook-level3](https://github.com/se-e
 - **MarkBind** — for authoring and publishing the user and developer guides. ([markbind.org](https://markbind.org))
 - **GitHub Actions** — for continuous integration and automated build testing. ([github.com/features/actions](https://github.com/features/actions))
 
+### **AI-Assisted Tools**
+
+- **GitHub Copilot** — used as a code-completion assistant throughout the project. Copilot suggestions were used to accelerate writing of routine boilerplate code, test cases, and JavaDoc comments. It was also used to help identify and extract duplicated logic into shared utility methods and common helper classes across command and parser implementations, reducing code duplication. All AI-generated suggestions were reviewed, tested, and adapted by the team before being committed.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Setting up, getting started**
@@ -64,7 +68,7 @@ The bulk of the app's work is done by the following four components:
 
 **How the architecture components interact with each other**
 
-The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete 1`.
+The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `add n/John id/A0123456X ...`.
 
 <puml src="diagrams/ArchitectureSequenceDiagram.puml" width="574" />
 
@@ -85,7 +89,9 @@ The **API** of this component is specified in [`Ui.java`](https://github.com/se-
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
-The UI consists of a `MainWindow` that is made up of parts e.g.`CommandBox`, `ResultDisplay`, `PersonListPanel`, `StatusBarFooter` etc. All these, including the `MainWindow`, inherit from the abstract `UiPart` class which captures the commonalities between classes that represent parts of the visible GUI.
+The UI consists of a `MainWindow` that is made up of parts e.g.`CommandBox`, `ResultDisplay`, `PersonListPanel`, `ViewWindow`, `StatusBarFooter` etc. All these, including the `MainWindow`, inherit from the abstract `UiPart` class which captures the commonalities between classes that represent parts of the visible GUI.
+
+The `ViewWindow` is an embedded detail panel that displays a single student's full information (including remarks). It is shown inside the `MainWindow` when the user executes a `view` command or clicks a student row, and is automatically refreshed or cleared after subsequent commands to keep the displayed data in sync.
 
 The `UI` component uses the JavaFx UI framework. The layout of these UI parts are defined in matching `.fxml` files that are in the `src/main/resources/view` folder. For example, the layout of the [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java) is specified in [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml)
 
@@ -95,6 +101,7 @@ The `UI` component,
 * listens for changes to `Model` data so that the UI can be updated with the modified data.
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component, as it displays `Person` object residing in the `Model`.
+* automatically refreshes or clears the `ViewWindow` after every command execution — if the viewed student is still in the filtered list, the panel is refreshed with the latest data; if the student has been deleted or filtered out, the panel is cleared.
 
 
 ### Logic component
@@ -105,30 +112,30 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <puml src="diagrams/LogicClassDiagram.puml" width="550"/>
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
+The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("edit 1 n/John")` API call as an example.
 
-<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete 1` Command" />
+<puml src="diagrams/EditSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `edit 1 n/John` Command" />
 
 <box type="info" seamless>
 
-**Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline continues till the end of diagram.
+**Note:** The lifeline for `EditCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline continues till the end of diagram.
 </box>
 
 How the `Logic` component works:
 
-1. When `Logic` is called upon to execute a command, it is passed to an `AddressBookParser` object which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
-1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteCommand`) which is executed by the `LogicManager`.
-1. The command can communicate with the `Model` when it is executed (e.g. to delete a person).<br>
+1. When `Logic` is called upon to execute a command, it is passed to an `AddressBookParser` object which in turn creates a parser that matches the command (e.g., `EditCommandParser`) and uses it to parse the command.
+2. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `EditCommand`) which is executed by the `LogicManager`.
+3. The command can communicate with the `Model` when it is executed (e.g. to edit a person's details).<br>
    Note that although this is shown as a single step in the diagram above (for simplicity), in the code it can take several interactions (between the command object and the `Model`) to achieve.
-1. The result of the command execution is encapsulated as a `CommandResult` object which is returned back from `Logic`.
+4. The result of the command execution is encapsulated as a `CommandResult` object which is returned back from `Logic`.
 
 Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
 
 <puml src="diagrams/ParserClasses.puml" width="600"/>
 
 How the parsing works:
-* When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name e.g., `AddCommandParser`) which uses the other classes shown above to parse the user command and create a `XYZCommand` object (e.g., `AddCommand`) which the `AddressBookParser` returns back as a `Command` object.
-* All `XYZCommandParser` classes (e.g., `AddCommandParser`, `DeleteCommandParser`, ...) inherit from the `Parser` interface so that they can be treated similarly where possible e.g, during testing.
+* When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name e.g., `EditCommandParser`) which tokenizes the input using `ArgumentTokenizer` (with prefixes defined in CliSyntax) into `ArgumentMultimap`. `ParserValidators` then performs structural checks on the tokenized arguments (presence of required prefixed, rejecting unknown prefixes, and flagging blank values) and produces error messages via `ParserMessages`. `ParserUtil` is then used to validate and extract the individual field values, creating a `XYZCommand` object (e.g., `AddCommand`) which the `AddressBookParser` returns back as a `Command` object.
+* All `XYZCommandParser` classes (e.g., `AddCommandParser`, `EditCommandParser`, ...) inherit from the `Parser` interface so that they can be treated similarly where possible e.g, during testing.
 
 ### Model component
 **API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
@@ -180,160 +187,114 @@ This section describes some noteworthy details on how certain features are imple
 ### Feature: Filter Command
 
 #### Overview
-The filter command allows Teaching Assistants (TAs) to narrow down the displayed student list using one or more criteria. This is especially useful for managing large cohorts and identifying specific groups, such as students who are at-risk or frequently absent.
-The command only affects the current view and does not modify any underlying student data.
+The `filter` command allows TAs to narrow down the displayed student list using one or more criteria. This is useful for managing large cohorts and identifying specific groups, such as students who are at-risk or frequently absent. The command only affects the current view and does not modify any underlying student data.
+
 The supported criteria are:
-* Course ID (crs/)
-* Tutorial Group (tg/)
-* Progress Status (p/)
-* Minimum Absence Count (abs/)
-The expected format is:
-filter [crs/COURSE_ID] [tg/TUTORIAL_GROUP] [p/PROGRESS_STATUS] [abs/MIN_ABSENCE_COUNT]
-Example:
-filter crs/CS2103T tg/T01 abs/3
-This displays students in CS2103T T01 with at least 3 absences.
-#### Filtering behavior
-Multiple criteria are combined using logical AND
-A student is shown only if they satisfy all provided filters
-If no criteria are provided, the command is considered invalid
-Matching rules:
-Course ID and Tutorial Group → case-insensitive exact match
-Progress Status → exact enum match
-Absences → threshold match (>=)
+* Course ID (`crs/`)
+* Tutorial Group (`tg/`)
+* Progress Status (`p/`)
+* Minimum Absence Count (`abs/`)
+
+Multiple criteria are combined using logical AND — a student is shown only if they satisfy all provided filters. If no criteria are provided, the command is rejected.
 
 #### Implementation
-The filter feature is implemented using:
-FilterCommand
-FilterCommandParser
-FilterMatchesPredicate
-**Execution flow:**
-1. FilterCommandParser parses input arguments and validates prefixes
-2. Ensures at least one filtering criterion is present
-3. Constructs a FilterMatchesPredicate with the provided conditions
-4. FilterCommand#execute(Model model) is invoked by the LogicManager
-5. Command calls model.updateFilteredPersonList(predicate)
-6. The model updates the filtered list
-7. UI automatically refreshes via its binding to the observable list
-8. A CommandResult is returned showing the number of matched students
 
-Predicate design
-FilterMatchesPredicate implements Predicate<Person> and stores each criterion as an optional field.
-The test(Person person) method evaluates:
-Course and tutorial group matching
-Progress status equality
-Absence count threshold
-A student passes the predicate only if all present criteria evaluate to true.
+The filter feature introduces one key class beyond the standard parser–command pattern: `FilterMatchesPredicate`.
 
-Design Considerations
-Aspect: Combining multiple criteria
-Current choice: Logical AND
-Pros: Predictable; supports narrowing down results effectively
-Cons: Cannot perform OR-based queries (e.g., Course A or Course B)
-Alternative: Logical OR
-Pros: Enables broader searches
-Cons: Less useful for refinement; may return overly large result sets
-Aspect: Representation of filtering logic
-Current choice: Single predicate with optional fields
-Pros: Simple and centralized logic; easy to debug
-Cons: May become bulky as more criteria are added
-Alternative: Predicate composition (e.g., chaining smaller predicates)
-Pros: More modular and flexible
-Cons: Adds complexity; harder to trace combined filtering behavior
+`FilterMatchesPredicate` implements `Predicate<Person>` and stores each filtering criterion as an optional field. Its `test(Person)` method evaluates all present criteria against the given student:
+* Course ID and Tutorial Group use case-insensitive exact matching.
+* Progress Status uses exact enum matching.
+* Absence Count uses threshold matching (≥).
+
+A student passes the predicate only if all present criteria evaluate to true. During execution, `FilterCommand` passes this predicate to `Model#updateFilteredPersonList(Predicate)`, which updates the observable list that the UI is bound to.
+
+#### Design considerations
+
+**Aspect: Combining multiple criteria**
+
+* **Current choice — Logical AND:** Predictable behaviour; supports narrowing down results effectively. However, it does not support OR-based queries (e.g., Course A or Course B).
+* **Alternative — Logical OR:** Enables broader searches, but is less useful for refinement and may return overly large result sets.
+
+**Aspect: Representation of filtering logic**
+
+* **Current choice — Single predicate with optional fields:** Simple and centralised logic; easy to debug. However, it may become bulky as more criteria are added.
+* **Alternative — Predicate composition (chaining smaller predicates):** More modular and flexible, but adds complexity and makes combined filtering behaviour harder to trace.
 
 
 ### Feature: Delete Student
 
 #### Overview
 
-The `delete` command removes a student from TeachAssist. Compared to the original AB3 implementation, TeachAssist extends this feature in two ways:
+The `delete` command removes a student from TeachAssist.
 
-- It supports deleting a student either by displayed index or by exact student identity fields: `StudentId`, `CourseId`, and `TGroup`.
+Compared to the original AB3 implementation, TeachAssist extends this feature in two ways:
+
+- It supports deleting a student either by displayed index or by exact student identity fields: `STUDENT_ID`, `COURSE_ID`, and `TUTORIAL_GROUP`.
 - It introduces a confirmation step before the deletion is carried out.
 
-This is useful in TeachAssist because student records are identified by student-specific attributes rather than generic contact information, and accidental deletion of a student record should be avoided.
+This is useful because student records are important and should not be removed accidentally, especially when a TA may be managing many students across multiple courses and tutorial groups.
 
-**Supported delete modes**
+#### Supported delete modes
 
 TeachAssist supports the following delete modes:
 
-- **Delete by displayed index**  
-  The user deletes a student using the index shown in the current displayed student list.  
+- **Delete by displayed index**
+  The user deletes a student using the index shown in the current displayed student list.
   Example: `delete 1`
 
-- **Delete by exact student details**  
-  The user deletes a student by specifying the student’s `StudentId`, `CourseId`, and `TGroup`.  
+- **Delete by exact student details**
+  The user deletes a student by specifying the student’s `STUDENT_ID`, `COURSE_ID`, and `TUTORIAL_GROUP`.
   Example: `delete id/A1234567X crs/CS2103T tg/T01`
 
-This identity-based deletion mode is useful when the user wants to target a specific student directly, rather than relying on the current displayed index.
+For detail-based deletion, the match is performed against the **entire TeachAssist list**, rather than only the currently filtered list. This allows the user to delete a specific student directly even if that student is not currently visible in the displayed list.
 
 #### Implementation
 
-The `delete` feature is implemented using `AddressBookParser`, `DeleteCommandParser`, `DeleteCommand`, `ConfirmedDeleteCommand`, `ConfirmCommand`, `CancelCommand`, and `ConfirmationManager`.
+The `delete` feature is implemented primarily using `DeleteCommand`, `ConfirmedDeleteCommand`, and `LogicManager`.
 
-`AddressBookParser` first checks whether TeachAssist is currently waiting for a confirmation response. If there is a pending delete action, `yes` is parsed into a `ConfirmCommand` and `no` is parsed into a `CancelCommand`. Otherwise, normal command parsing proceeds.
 
-When the user enters a `delete` command, `AddressBookParser` delegates argument parsing to `DeleteCommandParser`. `DeleteCommandParser` supports two valid formats:
+When the user enters a `delete` command, the command is first parsed into a `DeleteCommand`. However, the student is **not deleted immediately**.
 
-- `delete INDEX`
-- `delete id/STUDENT_ID crs/COURSE_ID tg/TGROUP`
+Instead, `LogicManager` handles deletion as a two-stage workflow:
 
-`DeleteCommandParser` performs format-level validation, including:
-- checking that the input is not empty
-- distinguishing between index-based and identity-based deletion
-- ensuring that all required prefixes for detail-based deletion are present
-- rejecting duplicate prefixes
-- rejecting malformed index input
-- rejecting unexpected trailing text after an index
+1. the target student is first resolved by `DeleteCommand`
+2. the actual deletion only happens after the user explicitly confirms with `yes`
 
-After successful parsing, a `DeleteCommand` object is created. However, checks that depend on the current model state are deferred to command execution. For example, although the parser can verify that an index is written in a valid format, it cannot determine whether that index is within the bounds of the current filtered student list. Similarly, although the parser can verify that `StudentId`, `CourseId`, and `TGroup` are provided in the correct format, it cannot determine whether those values actually match a student in the current filtered list. These checks are therefore performed in `DeleteCommand#execute(Model)`.
+After parsing a valid `DeleteCommand`, `LogicManager` calls `DeleteCommand#getConfirmedCommand(model)` to create a `ConfirmedDeleteCommand`, and `DeleteCommand#getConfirmationMessage(model)` to generate the confirmation message shown to the user. The resulting `ConfirmedDeleteCommand` is then stored temporarily inside `LogicManager` as a pending confirmation command.
 
-The confirmation workflow proceeds as follows:
+If the user enters `yes`, `LogicManager` executes the stored `ConfirmedDeleteCommand`. `ConfirmedDeleteCommand#execute(Model)` then performs the actual deletion through `Model#deletePerson(Person)`.
 
-- `LogicManager#execute(String)` calls `AddressBookParser#parseCommand(String)`.
-- `AddressBookParser` uses `DeleteCommandParser` to create a `DeleteCommand`.
-- `DeleteCommand#execute(Model)` resolves the target student from the current filtered list.
-- If the target student cannot be resolved, a `CommandException` is thrown and no confirmation is requested.
-- If the target student is successfully resolved, `DeleteCommand` creates a `ConfirmedDeleteCommand` containing the resolved `Person`.
-- `DeleteCommand` stores this pending command in `ConfirmationManager` using `ConfirmationManager#setPendingCommand(Command)`.
-- `DeleteCommand` then returns a `CommandResult` containing the confirmation message.
+If the user enters `no`, `LogicManager` clears the stored pending command and no deletion occurs.
 
-When the user enters `yes`, `AddressBookParser` returns a `ConfirmCommand`. `ConfirmCommand#execute(Model)` retrieves the pending `ConfirmedDeleteCommand` from `ConfirmationManager`, clears the pending state, and executes it. `ConfirmedDeleteCommand#execute(Model)` then performs the actual deletion through `Model#deletePerson(Person)`.
+If the user enters some other command instead, `LogicManager` also clears the pending command. In other words, the confirmation is only valid for the immediate follow-up response, and any other input cancels the pending deletion flow.
 
-When the user enters `no`, `AddressBookParser` returns a `CancelCommand`. `CancelCommand#execute(Model)` clears the pending command in `ConfirmationManager` and returns a cancellation message.
+This design separates intent resolution from destructive execution:
 
-This separation keeps responsibilities clear:
-- `DeleteCommand` resolves the deletion target and initiates confirmation.
-- `ConfirmedDeleteCommand` performs the actual deletion.
-- `ConfirmCommand` and `CancelCommand` handle the user’s confirmation response.
-- `ConfirmationManager` stores the pending command between the initial delete request and the final user response.
+- `DeleteCommand` identifies which student the user intends to delete
+- `ConfirmedDeleteCommand` performs the actual deletion only after explicit confirmation has been received
+
 
 <box type="info" seamless>
 
-**Relevant diagram:** Delete-related class structure.
+**Relevant diagram:** Delete confirmation workflow.
 
-<puml src="diagrams/DeleteClassDiagram.puml" width="600" />
-
-</box>
-
-<box type="info" seamless>
-
-**Relevant diagram:** Successful confirmation flow after the user enters `yes`.
-
-<@isha to put sequence diagram here>
+<puml src="diagrams/DeleteConfirmationActivityDiagram.puml" width="600" />
 
 </box>
 
 #### Design considerations
 
-One possible design was to delete the student immediately after a valid `delete` command. This would have produced a simpler command flow, but it was rejected because it makes accidental deletion easier.
+A simpler design would have been to delete the student immediately after a valid `delete` command. However, this was rejected because deletion is irreversible at the command level and a user may accidentally target the wrong student, especially when working quickly with many similar records.
 
-The chosen design introduces a confirmation step. This adds extra classes and command flow, but improves safety by requiring an explicit user confirmation before the student record is removed. This is more suitable for TeachAssist, where student data should not be deleted unintentionally.
+TeachAssist therefore requires an explicit confirmation step for `delete`.
+
+This differs from `clear`, which does not require confirmation. The rationale is that `clear` is a deliberate bulk-action command whose purpose is already explicit from the command word itself, whereas `delete` is more prone to accidental misuse, such as deleting the wrong student by index or entering the wrong identity fields. Requiring confirmation for `delete` therefore improves safety where the risk of unintended removal is higher.
 
 ### Feature: Update Progress
 
 #### Overview
 
-The `progress` command allows TAs to record a student's current academic or follow-up status in TeachAssist.
+The `updateprogress` command allows TAs to record a student's current academic or follow-up status in TeachAssist.
 
 This helps TAs quickly identify which students are doing well, which students may need support, and which students require closer monitoring. By storing progress directly in each student record, TeachAssist makes it easier to keep track of follow-up priorities across multiple students.
 
@@ -347,25 +308,8 @@ The supported progress values are:
 - `AT_RISK`
 - `NOT_SET`
 
-`NOT_SET` is the default value and represents the absence of an explicitly assigned progress status.
-
+`NOT_SET` is the default value and represents the absence of an explicitly assigned progress status. It is used internally in the model, and no progress label is shown in the UI when a student's progress is `NOT_SET`.
 Using an enum ensures that only valid progress values can be stored, which simplifies validation and prevents inconsistent states.
-
-#### Implementation
-
-The `progress` feature is implemented using `ProgressCommand`, `ProgressCommandParser`, the `Progress` enum, and the model's person update mechanism.
-
-When the user enters a `progress` command, `AddressBookParser` delegates parsing of the command arguments to `ProgressCommandParser`. `ProgressCommandParser` parses the target student index and the new progress value. The parser validates that the index is present and in a valid format, that the `p/` prefix is provided, and that the progress value is one of the supported enum values. After successful parsing, a `ProgressCommand` is created.
-
-During execution, `ProgressCommand` retrieves the student at the specified index from the current filtered student list. If the index is out of range, the command fails. If the index is valid, a new `Person` object is created based on the original student but with the updated progress value. The old student record is then replaced with the updated one through the model.
-
-This follows the same general approach as other commands that modify a student record: instead of mutating the existing student directly, TeachAssist creates an updated `Person` object and replaces the original in the model. If the new progress value is `NOT_SET`, the student's progress is effectively cleared.
-
-<box type="info" seamless>
-
-**Note:** The sequence diagram illustrating how `ProgressCommand` is executed is shown in the [Logic component](#logic-component) section above.
-
-</box>
 
 #### UI integration
 
@@ -377,69 +321,37 @@ A key design consideration was how to represent progress in the model. One possi
 
 Another design consideration was whether to show `NOT_SET` explicitly in the UI. Showing `NOT_SET` as a visible label would make the implementation more uniform, but it would also add unnecessary visual clutter for students whose progress has not been set. The chosen design hides `NOT_SET` in the UI, so only meaningful progress statuses are shown.
 
-### Feature: Mark Attendance
+### Feature: Mark Attendance Command
 
 #### Overview
 
-The `markattendance` command allows tutors to record or update a student’s attendance for a specific week. This feature enables per-week attendance tracking instead of aggregate counts, providing finer control over tutorial participation records.
+The `marka` command allows tutors to record or update a student’s attendance for a specific week. This feature enables per-week attendance tracking instead of aggregate counts, providing finer control over tutorial participation records.
 
-Each student’s attendance is tracked weekly, allowing tutors to:
-- Mark attendance as **attended (Y)**, **absent (A)**, or **not marked (N)**
-- Prevent marking for cancelled weeks
-- Avoid duplicate updates to the same attendance status
-- Automatically respect course-level cancelled weeks
+This command operates on a single student identified by index from the currently displayed list and updates the attendance status for one week.
 
----
-
-#### Attendance representation
-
-Attendance is represented as a **structured list of weekly records**.
-
-- Each `Person` contains a `WeekList`
-- `WeekList` stores a fixed-size array of **13 `Week` objects**
-- Each `Week` represents one tutorial session
-
-Each `Week` contains:
-- `weekNo` — week number
-- `status` — current attendance state
-- `prevStatus` — used for cancellation recovery
-
-Attendance status is defined using an enum:
-- `Y` → Attended
+Supported statuses:
+- `Y` → Present
 - `A` → Absent
 - `N` → Not marked
-- `C` → Cancelled
 
-Cancelled weeks are derived from a **course–tutorial level cancelled week map** stored in the `Model`. When a week is cancelled, all students in the same `(CourseId, TGroup)` pair automatically inherit the cancelled state.
+**Format:**
+marka <INDEX> wk/<WEEK_NUMBER> s/<STATUS>
 
----
+**Example:**
+marka 1 wk/5 s/Y
 
-#### Implementation
 
-The `markattendance` feature is implemented using `MarkAttendanceCommand` and `MarkAttendanceCommandParser`.
+#### Design Considerations
 
-**Parsing phase:**
-1. User input is tokenized using `ArgumentTokenizer`
-2. Required prefixes (`week/`, `sta/`) are validated
-3. Values are parsed into:
-    - `Index` (student)
-    - `Index` (week)
-    - `Week.Status` (attendance state)
+**Aspect: Enforcement of business rules (cancelled weeks)**
 
-**Execution phase:**
-1. The command retrieves the filtered student list from the `Model`
-2. The target `Person` is identified using the provided index
-3. The student’s `WeekList` is copied to preserve immutability
-4. The specified week is validated:
-    - Must be within range (1–13)
-    - Must not be cancelled
-5. The attendance status is updated via `WeekList`
-6. A new `Person` object is created with the updated `WeekList`
-7. The model replaces the old `Person` with the updated one
+* **Current choice - Command-layer validation before model update:** This gives immediate user feedback and prevents invalid state transitions from reaching the model. However, it causes slight duplication with Week-level internal checks.
+* **Alternative — Allow Week class to silently ignore invalid updates:** This gives simpler command logic, but that reduces transparency and makes debugging harder.
 
-If an invalid operation occurs (e.g., duplicate status or cancelled week), a `CommandException` is thrown.
+**Aspect: State update strategy**
 
----
+* **Current choice - Copy-on-write (WeekList duplication before update):** This preserves immutability of Person objects and prevents unintended side effects across references. However, it causes slight performance overhead due to object copying.
+* **Alternative - Direct mutation of WeekList:** This would be more efficient but risks shared-state bugs and inconsistent UI updates.
 
 #### Sequence diagram
 
@@ -447,95 +359,80 @@ The following diagram shows how attendance input is parsed, validated, and appli
 <puml src="diagrams/MarkAttendanceSequenceDiagram.puml" width="600" />
 
 
-### Feature: Cancel Week
+### Feature: Cancel Week Command
 
 #### Overview
 
-The `cancelweek` command allows tutors to mark a specific tutorial week as cancelled for **all students belonging to a given course and tutorial group**. This is useful when a tutorial session is cancelled due to public holidays, instructor absence, or rescheduled lessons.
+The `cancelw` command marks a specific week as cancelled for all students in a given course and tutorial group.
 
-The command word is `cancelweek`, and its expected format is:
+A cancelled week:
+- Cannot be marked for attendance
+- Is excluded from attendance calculations
 
-`cancelweek crs/COURSE_ID tg/TUTORIAL_GROUP week/WEEK_NUMBER`
+**Format:**
+cancelw crs/<COURSE_ID> tg/<TUTORIAL_GROUP> wk/<WEEK_NUMBER>
 
-For example, `cancelweek crs/CS2103T tg/T01 week/5` cancels week 5 for all students in CS2103T T01.
+**Example:**
+cancelw crs/CS2103T tg/T01 wk/5
 
----
 
-#### Cancelled week representation
+#### Design Considerations
 
-Cancelled weeks are stored at **course-tutorial level**, not per student.
+**Aspect: Consistency of cancellation state**
 
-The `Model` maintains:
-- A mapping of `(CourseId, TGroup)` pairs
-- Each entry stores cancelled week indices
+* **Current choice - Centralised `cancelledWeeksMap` with propagation to WeekList:** This ensures consistent view across all students and efficient lookup for cancellation status. However, it requires careful synchronisation between map and WeekList.
+* **Alternative - Store cancellation only in WeekList:** This gives simpler data ownership model but is harder to query and maintain group-level cancellation state.
 
-When a week is cancelled:
-- The week index is stored in the model
-- All students in the matching `(CourseId, TGroup)` are updated
-- Their `WeekList` marks the week as `C`
-- Previous status is stored for recovery
-  - however, when TeachAssist is closed you cannot recover the statuses, in cancelled week
 
 ---
 
-#### Implementation
 
-The `cancelweek` feature is implemented using `CancelWeekCommand` and `CancelWeekCommandParser`.
-
-Execution flow:
-1. Parser validates `crs/`, `tg/`, and `week/`
-2. Command checks that `(CourseId, TGroup)` exists
-3. Command validates week range
-4. Model checks duplicate cancellation
-5. `ModelManager.addCancelledWeek()` is called
-6. Matching students' `WeekList` objects are updated
-7. Cancelled week is stored in persistent map
-
-If the week is already cancelled, a `CommandException` is thrown.
-
-### Feature: Uncancel Week
+### Feature: Uncancel Week Command
 
 #### Overview
 
-The `uncancelweek` command removes a previously cancelled week for a specific course and tutorial group. This restores the week’s attendance status for all affected students.
+The `uncancelw` command reverses a previously cancelled week for a given course and tutorial group.
 
-The command word is `uncancelweek`, and its expected format is:
+After uncancelling:
+- The week becomes available for attendance marking
+- The previously stored attendance status is restored
 
-`uncancelweek crs/COURSE_ID tg/TUTORIAL_GROUP week/WEEK_NUMBER`
+<box type="info" seamless></box>
 
-For example, `uncancelweek crs/CS2103T tg/T01 week/5` restores week 5.
+**Note:** Transience of Previous Week Status
 
----
+The `prevStatus` field in `Week` is **transient and not persisted to storage**. 
+It is only used during runtime to support the uncancel operation, allowing a cancelled week to restore its previous attendance state.
 
-#### Behaviour
+This design is intentional because:
 
-When a cancelled week is restored:
-- The week is removed from the cancelled week map
-- All students in the `(CourseId, TGroup)` pair are updated
-- Their `WeekList` restores the previous status
-- UI reflects restored attendance values
+- `prevStatus` is only meaningful during a single session’s cancellation lifecycle
+- Persisting it would unnecessarily increase storage complexity and risk stale state restoration
 
----
+As a result, uncancelling after restart restores to default.
 
-#### Implementation
+</box></box>
 
-The `uncancelweek` feature is implemented using `UnCancelWeekCommand` and `UnCancelWeekCommandParser`.
 
-Execution flow:
-1. Parser validates prefixes
-2. Command checks course–tutorial existence
-3. Command verifies week is currently cancelled
-4. `ModelManager.removeCancelledWeek()` is called
-5. Matching students are updated
-6. Persistent map is updated
+**Format:**
+uncancelw crs/<COURSE_ID> tg/<TUTORIAL_GROUP> wk/<WEEK_NUMBER>
 
-If the week is not cancelled, the command safely does nothing.
+**Example:**
+uncancelw crs/CS2103T tg/T01 wk/5
+
+
+#### Design Considerations
+
+**Aspect: Restoring previous attendance state**
+
+* **Current choice - Store previous status inside Week:** This ensures accurate restoration of original attendance and preserves user input history. However there is additional state management complexity.
+* **Alternative - Reset to default status:** This requires simpler implementation but causes loss of original attendance information.
 
 
 ### Feature: Remark Command
 #### Overview
 
-The `remark` command allows a teaching assistant to attach a short note to a specific student. This is useful for recording contextual observations that are not captured by the standard student fields (e.g class participation, submission behaviour, consultation follow-ups, or other teaching-related comments)
+The `remark` command allows a teaching assistant to attach a remark to a specific student. This is useful for recording contextual observations that are not captured by the standard student fields (e.g, class participation, submission behaviour, consultation follow-ups, or other teaching-related comments)
 
 The command targets a student by their displayed student index in the current person list and adds a remark to that student. The remark is intended to help TAs keep track of student-specific context across multiple interactions. The command word is `remark`, and its expected format is:
 
@@ -551,88 +448,120 @@ In the model, a remark is represented as a dedicated `Remark` object rather than
 
 This design allows each remark to carry basic metadata in addition to its content. In the current implementation, the creation date is automatically assigned using `LocalDate.now()` when the command is parsed. This means the user only provides the text of the remark, while the system records the date implicitly.
 
-- Remarks are associated with a `Person` as a list of remark objects. 
+- Remarks are stored in each `Person` as a `List<Remark>`.
 - In storage, `JsonAdaptedPerson` stores `remarks` as a `List<JsonAdaptedRemark>`.
 - Each `JsonAdaptedRemark` contains a `text` field and a `date` field.
 - During deserialization, each adapted remark is converted back into a model-level `Remark` object and reattached to the corresponding person.
 
 #### Implementation
 
-The `remark` feature is implemented using the `RemarkCommand` and `RemarkCommandParser` classes. The parser is responsible for extracting the target student index and the remark text from user input. It tokenizes the input using the `txt/` prefix, validates that both the preamble and the remark body are present, parses the preamble as an `Index`, trims the remark text, and constructs a new `Remark` object with the supplied text and the current date. It then returns a `RemarkCommand` containing the parsed index and newly created remark.
+When `RemarkCommand#execute` is called, the command first retrieves the currently filtered person list from the model. It checks whether the provided index is within bounds; if not, it throws a `CommandException` using `Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX`. Otherwise, it retrieves the target `Person` from the displayed list, constructs a copy of that person, adds the new remark to the copied person, and updates the model using `model.setPerson(personToEdit, editedPerson)`. A success message is then returned to the user.
 
-When `RemarkCommand#execute` is called, the command first retrieves the currently filtered person list from the model. It checks whether the provided index is within bounds; if not, it throws a `CommandException` using `Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX`. Otherwise, it retrieves the target `Person` from the displayed list and adds the new remark to that person using `personToEdit.addRemark(remark)`. A success message is then returned to the user.
+An important implementation detail is that the command does not mutate the original `Person` object in place. Instead, it works on a copied `Person` instance and replaces the old person in the model using `setPerson(...)`. This makes the update explicit and aligns the remark feature with the application's general update pattern.
 
-An important implementation detail is that the current version modifies the retrieved `Person` object directly by invoking `addRemark` on it. In other words, the command does not construct a replacement `Person` and does not call a model-level replacement method such as `setPerson(...)`. In the current implementation, the command adds the new `Remark` directly to the selected `Person` object using `addRemark(remark)`.
+The following sequence diagram provides a simplified view of how the updated address book state is persisted through the storage layer after execution of the `remark` command.
 
-The parsing and execution flow can therefore be summarized as follows:
-1. User enters a `remark` command with a student index and remark text.
-2. `RemarkCommandParser` validates the format and creates a `Remark` with the current date.
-3. A `RemarkCommand` is created with the parsed index and remark.
-4. `RemarkCommand#execute` checks that the student index is valid.
-5. The target student's remark list is updated by adding the new remark.
-6. A success result is returned.
+![Remark command sequence diagram](images/RemarkSequenceDiagram.puml)
 
-#### Design Considerations
-
-Using a dedicated `Remark` object instead of a raw string makes the feature more extensible. Since each remark already stores both text and date, the design can be extended in future to support richer metadata such as author, category, or edit history without changing the overall remark-management structure. The storage layer already supports this object-based design through `JsonAdaptedRemark`.
-
-### Feature: Unremark Command
-
-#### Overview
-
-The `unremark` command allows a teaching assistant to delete an existing remark from a specific student record. This is useful when a remark is no longer relevant, was added by mistake, or needs to be removed to keep the student’s record concise and up to date.
-
-The command targets a student by their displayed index in the current person list, and then targets a specific remark belonging to that student by its remark index. The command word is `unremark`, and its expected format is:
-
-`unremark INDEX r/REMARK_INDEX`
-
-For example, `unremark 1 r/2` removes the second remark from the first student in the displayed list.
-
-#### Unremark Representation
-
-The `unremark` command operates on the same `Remark` representation described in the `remark` feature. Each `Person` maintains a list of `Remark` objects, and `unremark` removes one existing remark from that list based on its remark index.
-
-#### Implementation
-
-The `unremark` feature is implemented using the `UnremarkCommand` and `UnremarkCommandParser` classes. The parser tokenizes user input using the `r/` prefix, validates that both the student index and the remark index are present, parses both values as `Index` objects, and constructs an `UnremarkCommand` containing the parsed student index and remark index.
-
-When `UnremarkCommand#execute` is called, the command first retrieves the currently filtered person list from the model. It checks whether the provided student index is within bounds; if not, it throws a `CommandException` using `Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX`. It then retrieves the target `Person` from the displayed list and checks whether the provided remark index is valid for that person’s remark list. If the remark index is out of bounds, the command throws a `CommandException` with `MESSAGE_INVALID_REMARK_INDEX`. Otherwise, the command deletes the selected remark by calling `personToEdit.deleteRemark(remarkIndex)`, and returns a success message.
-
-The execution flow can therefore be summarized as follows:
-1. User enters an `unremark` command with a student index and a remark index.
-2. `UnremarkCommandParser` validates the format and parses both indices.
-3. An `UnremarkCommand` is created with the parsed student index and remark index.
-4. `UnremarkCommand#execute` checks that the student index is valid.
-5. The command checks that the remark index is valid for the selected student.
-6. The specified remark is removed from the student’s remark list.
-7. A success result is returned.
-
-#### Design Considerations
-
-Using a separate `unremark` command allows remark deletion to remain explicit and precise. Since a student may have multiple remarks, requiring both the student index and the remark index ensures that the command targets exactly one stored remark. This avoids ambiguity and keeps remark management consistent with the object-based remark representation used in the model and storage layers.
 
 ### Feature: View Command
 
 #### Overview
 
-The `view` command opens a dedicated panel on the right-hand side of the UI to display the full details of a single student. This provides a comprehensive, at-a-glance summary, including the student's attendance record and all associated remarks, which are not fully visible in the main list.
+The `view` command opens a dedicated panel on the right-hand side of the UI to display the full details of a single student. This provides a comprehensive, at-a-glance summary including the student's attendance record and all associated remarks, which are not fully visible in the main list. The same panel also opens when the user clicks on a student row in the list.
 
 #### Implementation
 
-The `view` command is implemented by `ViewCommand`, `ViewCommandParser`, and the `ViewWindow` UI component.
+The `view` feature is implemented by `ViewCommand`, `ViewCommandParser`, the `ViewWindow` UI component, and the auto-sync logic in `MainWindow`.
 
-1.  **`ViewCommandParser`**: Parses the user input to extract the target student's index from the currently displayed list.
-2.  **`ViewCommand`**: Retrieves the `Person` object from the `Model` at the specified index. It then returns a `CommandResult` with the `showView` flag set to `true` and a reference to the `Person` object to be viewed.
-3.  **`MainWindow`**: Receives the `CommandResult` and calls `handleView(person)`. This method updates the `ViewWindow` with the student's data and displays it in the `viewWindowPlaceholder`.
-4.  **`ViewWindow`**: A `UiPart` that contains FXML elements for displaying person details. Its `setPerson(Person person)` method populates the UI fields with the student's information, including dynamically generated cards for each remark.
+1. **`ViewCommand`**: Retrieves the `Person` object from the model's filtered list at the specified index. It returns a `CommandResult` that carries a reference to the `Person` to be viewed. `CommandResult#shouldShowView()` returns `true` when this reference is non-null.
+2. **`MainWindow#handleCommandResult`**: Checks `shouldShowView()` on the returned `CommandResult`. If true, it calls `handleView(person)`, which passes the `Person` to `ViewWindow#setPerson` and lazily adds the `ViewWindow` root node to `viewWindowPlaceholder` if not already present. It also syncs the list selection highlight to the viewed student.
+3. **`ViewWindow#setPerson`**: Populates the UI labels with the student's metadata (name, student ID, course, tutorial group) and dynamically generates a row of `Label` nodes in a `GridPane` for each remark.
+4. **Click-to-view**: `MainWindow#fillInnerParts` registers a mouse click handler on the `PersonListPanel` that calls `handleView(selectedPerson)`, providing the same view behaviour without typing a command.
 
 #### View Window Auto-Sync
 
-The `ViewWindow` has logic to automatically update or clear itself after any command is executed. This ensures the displayed details do not become stale. For example, if the user edits a student who is currently being viewed, the view should refresh. If the student is deleted or filtered out of the main list, the view should be cleared.
+After every command execution, `MainWindow#updateViewWindowAfterCommand()` ensures the view panel stays in sync with the underlying data. This runs regardless of which command was executed.
 
-The activity diagram below illustrates this logic, which is primarily handled by the `updateViewWindowAfterCommand()` method in `MainWindow`.
+The logic is:
 
-<puml src="diagrams/ViewWindowSyncActivityDiagram.puml" alt="View Window Auto-Sync Logic" />
+1. If the `ViewWindow` is not currently visible (i.e. `viewWindowPlaceholder` is empty), do nothing.
+2. Otherwise, search the current filtered person list for the student being viewed, using `ViewWindow#isViewing(Person)`. This method compares using `Person#isSamePerson` (name + course + tutorial group) rather than `equals`, so the view persists even when identity fields like student ID or email are edited.
+3. If the student is found in the list, refresh `ViewWindow` with the updated `Person` object and re-select them in the list.
+4. If the student is not found (e.g. deleted, or filtered out), clear the `ViewWindow`, remove it from the display, and clear the list selection highlight.
+
+
+### \[Proposed\] Batch Attendance Marking
+
+#### Motivation
+
+Currently, the `marka` command marks attendance for a single student at a time. In practice, TAs typically mark attendance for an entire tutorial group in one sitting. For a class of 20+ students this requires 20+ individual `marka` commands — slow and error-prone. A batch marking command would allow TAs to mark all students in a course–tutorial group for a given week in a single command.
+
+#### Proposed command format
+
+`markall crs/COURSE_ID tg/TUTORIAL_GROUP week/WEEK_NUMBER sta/STATUS`
+
+Example: `markall crs/CS2103T tg/T01 week/3 sta/Y` marks week 3 as attended for every student in CS2103T T01.
+
+#### Proposed implementation
+
+The feature would introduce two new classes: `MarkAllCommand` and `MarkAllCommandParser`.
+
+**Parsing phase:**
+`MarkAllCommandParser` validates that all four prefixes (`crs/`, `tg/`, `week/`, `sta/`) are present and parses their values into a `CourseId`, `TGroup`, week `Index`, and `Week.Status`.
+
+**Execution phase:**
+`MarkAllCommand#execute(Model)` proceeds as follows:
+
+1. Retrieve the full person list from the model.
+2. Filter to students matching the given `CourseId` and `TGroup`.
+3. If no students match, throw a `CommandException`.
+4. For each matching student:
+   a. Copy the student's `WeekList`.
+   b. Check the target week's status. If the week is **cancelled**, skip this student and add them to a skipped list.
+   c. Otherwise, mark the week with the given status and replace the student in the model via `Model#setPerson`.
+5. Return a `CommandResult` summarising how many students were marked and how many were skipped due to cancellation.
+
+This is a **partial-success** design: students with cancelled weeks are skipped rather than causing the entire command to fail. This is preferable in a batch context because a single cancelled week (e.g. from a makeup tutorial) should not block the TA from marking the rest of the class.
+
+
+#### Design considerations
+
+**Aspect: Handling cancelled weeks in a batch operation**
+
+* **Chosen approach — Partial success (skip and report):** Each student is processed independently. Students whose target week is cancelled are silently skipped and reported in the summary. This is the most practical behaviour for TAs: they can mark the whole class and review the skipped list afterward.
+* **Alternative — All-or-nothing (transactional):** If any student's week is cancelled, the entire batch fails and no attendance is updated. This is safer against inconsistency, but impractical — a single cancelled week would force the TA to manually mark every other student individually, defeating the purpose of the batch command.
+
+**Aspect: Matching students by course and tutorial group vs. by current filtered list**
+
+* **Chosen approach — Explicit `crs/` and `tg/` prefixes:** The command always targets a specific course–tutorial group pair regardless of the current displayed list. This makes the command self-contained and deterministic — the same command always affects the same students.
+* **Alternative — Operate on the current filtered list:** `markall week/3 sta/Y` would mark all currently displayed students. This is more flexible but also more dangerous: the TA might forget they have an active filter, leading to unintended partial marking. The explicit approach is safer for a batch write operation.
+
+
+### \[Proposed\] Undo / Redo
+
+#### Motivation
+
+Currently, TeachAssist has no way to reverse a command after execution. A TA who accidentally deletes the wrong student, overwrites attendance, or edits the wrong field must manually re-enter the correct data. An undo/redo mechanism would let users recover from mistakes instantly.
+
+#### Proposed implementation
+
+The feature centres on a `VersionedAddressBook` that extends `AddressBook` with an internal state history list and a `currentStatePointer`. Each mutating command (e.g., `add`, `edit`, `delete`, `marka`) calls `Model#commitAddressBook()` after execution, which saves a copy of the current address book state to the history.
+
+- `UndoCommand` calls `Model#undoAddressBook()`, which decrements the pointer and restores the previous state.
+- `RedoCommand` calls `Model#redoAddressBook()`, which increments the pointer and restores the next state.
+- If a new mutating command is executed after an undo, all forward states beyond the pointer are discarded.
+
+The sequence diagram below shows how `VersionedAddressBook` restores a previous state when `undo` is invoked. The outer command execution flow (LogicManager → UndoCommand → Model) follows the same pattern shown in the [Logic component](#logic-component) section.
+
+<puml src="diagrams/UndoSequenceDiagram.puml" width="600" />
+
+#### Design considerations
+
+**Aspect: State storage granularity**
+
+* **Chosen approach — Full address book snapshots:** Each commit stores a complete copy of the address book. Simple to implement and reason about, but uses more memory for large datasets.
+* **Alternative — Command-level inverse operations:** Store the inverse of each command (e.g., an `add` stores a corresponding `delete`). More memory-efficient, but significantly harder to implement correctly for commands that modify multiple records (e.g., `cancelw` affecting all students in a group).
 
 
 --------------------------------------------------------------------------------------------------------------------
@@ -651,19 +580,17 @@ The activity diagram below illustrates this logic, which is primarily handled by
 
 ### Product scope
 
-TeachAssist is a standalone, local CLI application designed to streamline student data management for university teaching assistants through a high-speed, typing-based interface. The system focuses exclusively on the structured organization of student information and manual consultation logging, deliberately eschewing integration with external platforms like Canvas or cloud-based databases. To maintain its lightweight and specialized nature, TeachAssist does not include features for automated communication, calendar scheduling, or academic analytics; it does not compute grades, generate transcripts, or provide predictive student tracking. By prioritizing a command-line workflow over a traditional GUI, TeachAssist provides an efficient, distraction-free environment for TAs to manage high volumes of contacts and administrative records across multiple classes.
+TeachAssist is a desktop CLI application for university teaching assistants at NUS to manage student data. It supports structured storage of student records, attendance tracking, progress tagging, and remarks. It is a local, offline tool — it does not integrate with external platforms, compute grades, or provide automated analytics.
 
 **Target user profile**:
 
-TeachAssist is specifically optimized for a distinct niche of academic administrators. Our ideal user:
-* Role: Full-time University Teaching Assistants (TAs) at NUS.
-* Workload: Manages a significant volume of student contacts and consultation records across multiple classes and tutorial groups each semester.
-* Platform Preference: Prefers a dedicated desktop environment over web-based tools.
-* Technical Proficiency: Reasonably comfortable with Command Line Interface (CLI) applications and values the precision of text-based input.
-* Performance: A fast typist who finds traditional Mouse/GUI interactions cumbersome and "slow" for repetitive data entry.
+* Full time University Teaching Assistants (TAs) at NUS
+* Manages student contacts and records across multiple courses and tutorial groups
+* Prefers desktop applications over web-based tools
+* Comfortable with CLI applications and fast at typing
 
-**Value proposition**: 
-TeachAssist provides a high-speed, structured student management system that bridges the gap between disorganized spreadsheets and overly complex enterprise software. By utilizing a typing-based interface, it allows TAs to execute administrative tasks—such as updating student details or logging consultation notes—significantly faster than a typical mouse-driven application.
+**Value proposition**:
+TeachAssist consolidates student data, attendance, progress tracking, and consultation remarks into a single application, eliminating the need to juggle multiple platforms and spreadsheets. Its typing-based command interface lets TAs perform these tasks faster than a typical mouse-driven application.
 
 
 ### User stories
@@ -673,111 +600,220 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | Priority | As a … | I want to … | So that I can… |
 |----------|--------|-------------|---------------|
 | `**` | new user | see a welcome message on first launch | know how to get started |
-| `**` | new user | view a help command listing all available commands | understand what commands the system supports |
+| `**` | new user | open a help window listing all available commands | learn how to use the system |
 | `**` | new user | view preloaded sample student data | understand how student records are structured |
-| `**` | new user | purge all sample data | start working with my real student records |
-| `***` | TA | add a student with fields such as name, student ID, course ID, tutorial group, email, and Telegram handle | maintain complete and structured student records |
+| `**` | new user | clear all sample data | start using TeachAssist with my own student records |
+| `***` | TA | add a student with fields such as `NAME`, `STUDENT_ID`, `COURSE_ID`, `TUTORIAL_GROUP`, `EMAIL`, and `TELEGRAM_USERNAME` | maintain complete and structured student records |
 | `***` | TA | edit a student’s details | keep student records accurate and up to date |
+| `***` | TA | list all students | get an overview of all the students I am managing |
+| `**` | TA | find students by name keywords | quickly locate a student when I do not remember their full details |
+| `**` | TA managing multiple classes | filter or narrow down the displayed student list | focus on the relevant group of students more quickly |
 | `***` | TA | delete a student by index | quickly remove an incorrect or outdated student record |
-| `***` | TA | delete a student by student details | remove a specific student even when I do not want to rely on the displayed index |
+| `***` | TA | delete a student by `STUDENT_ID`, `COURSE_ID`, and `TUTORIAL_GROUP` | remove a specific student without relying on the displayed index |
 | `***` | careful TA | be asked to confirm before deleting a student | avoid accidentally deleting the wrong student record |
-| `***` | TA | view the full student list | get an overview of all the students I am managing |
-| `**` | TA handling multiple classes | filter or narrow down the displayed student list | focus on the relevant group of students more quickly |
-| `**` | TA handling multiple classes | identify students using course ID and tutorial group in addition to name | avoid confusion between students from different classes or students with similar names |
+| `**` | TA managing multiple classes | distinguish students by course ID and tutorial group as well as name | avoid confusion between students from different classes or with similar names |
+| `**` | careful TA | be prevented from adding duplicate student records | maintain clean and consistent data |
+| `**` | careful TA | receive clear error messages when a command format is invalid | correct mistakes quickly |
 | `***` | TA tracking student performance | update a student’s progress status | quickly identify which students are on track or need support |
 | `**` | TA preparing for class | view a student’s progress status in the UI | understand the student’s standing at a glance |
 | `***` | TA taking tutorial attendance | mark attendance for a student | keep a record of who attended class |
-| `***` | TA who conducts consultations | add remarks to a student’s record | remember important discussion points and follow-up actions |
-| `***` | TA who conducts consultations | view a student’s remarks and details | prepare for future consultations more effectively |
+| `***` | TA managing a tutorial group | cancel a tutorial week for a class | reflect weeks where no tutorial was conducted |
+| `**` | TA managing a tutorial group | restore a previously cancelled tutorial week | correct mistaken cancellations or resume normal attendance tracking |
+| `***` | TA managing multiple students | add remarks to a student’s record | keep track of important observations, follow-up actions, and teaching-related context |
+| `***` | TA managing multiple students | delete a remark from a student’s record | remove outdated, incorrect, or no longer relevant remarks |
+| `***` | TA managing multiple students | view a student’s full details and remarks | quickly review the student’s record before teaching or follow-up |
 | `**` | TA managing many students | keep remarks together with each student record | avoid scattering notes across separate apps or documents |
 | `**` | TA managing multiple tutorial groups | keep all students across different courses and tutorial groups in one application | avoid maintaining multiple spreadsheets or lists |
-| `**` | careful TA | receive clear error messages when a command format is invalid | correct mistakes quickly |
-| `**` | careful TA | be prevented from adding duplicate student records | maintain clean and consistent data |
-| `**` | TA | clear the current filter | return to the full student list after narrowing it down |
+| `**` | TA | return to the full student list after using find or filter | continue working with all students again |
 
 
 ### Use cases
 
-**Use Case: UC01 – Add Student**<br>
+**Use Case: UC01 – View Help**<br>
 **Actor:** User<br>
 **MSS:**
-1. User enters the command to add a student.
-2. User provides the student’s name, student ID, course, tutorial group, and optionally a Telegram username.
-3. TeachAssist validates the input.
-4. TeachAssist creates the student record.
-5. TeachAssist adds the student to the student list.
-6. TeachAssist confirms that the student has been added.
-7. Use case ends.
+1. User enters the `help` command.
+2. TeachAssist opens the Help Window, displaying the summary of available commands and a link to the User Guide.
+3. Use case ends.
 
 **Extensions:**
 
-* 3a. The input format is invalid.
-    * 3a1. TeachAssist displays an error message and the correct command format.
-    * Use case ends.
-* 3b. A student with the same student ID already exists.
-    * 3b1. TeachAssist rejects the command.
-    * 3b2. TeachAssist informs the user that the student already exists.
+* 1a. The Help Window is already open.
+    * 1a1. TeachAssist brings the existing Help Window into focus.
     * Use case ends.
 
-**Use Case: UC02 – Edit Student**<br>
+
+**Use Case: UC02 – Add Student**<br>
 **Actor:** User<br>
 **MSS:**
-1. User issues the `edit` command specifying a target student and the fields to update.
-2. TeachAssist validates the input and the existence of the target student.
-3. TeachAssist updates the student record with the provided changes.
-4. TeachAssist confirms that the student has been updated.
+1. User enters the command to add a student with the required details.
+2. TeachAssist creates the student record.
+3. TeachAssist adds the student to the student list.
+4. TeachAssist confirms that the student has been added.
 5. Use case ends.
 
 **Extensions:**
 
-* 2a. The input format is invalid.
-    * 2a1. TeachAssist displays an error message and the correct command format.
+* 1a. The command format is invalid.
+    * 1a1. TeachAssist displays an error message and the correct command format.
     * Use case ends.
-* 2b. The specified student does not exist.
-    * 2b1. TeachAssist informs the user that the specified student could not be found.
+* 1b. The student would duplicate an existing record because the same `STUDENT_ID`, `EMAIL`, or `TELEGRAM_USERNAME` is already used for the same `COURSE_ID` and `TUTORIAL_GROUP`.
+    * 1b1. TeachAssist shows an error message, informing the user that the student already exists.
     * Use case ends.
 
-**Use Case: UC05 – Mark Attendance**<br>
+
+**Use Case: UC03 – Find Students by Name**<br>
 **Actor:** User<br>
 **MSS:**
 
-1. User issues a command to mark attendance for a specific student and tutorial week.
-2. TeachAssist updates the attendance record for the specified student and week.
+1. User enters a `find` command with one or more name keywords.
+2. TeachAssist searches the student list for matching students.
+3. TeachAssist updates the displayed list to show only matching students.
+4. TeachAssist displays a result message showing the number of students found.
+5. Use case ends.
+
+**Extensions:**
+
+* 1a. The command format is invalid.
+    * 1a1. TeachAssist displays an error message and the correct command format.
+    * Use case ends.
+* 2a. No students match any of the keywords.
+    * 2a1. TeachAssist displays an empty list and a message indicating 0 students found.
+    * Use case ends.
+
+
+**Use Case: UC04 – Filter Student List**<br>
+**Actor:** User<br>
+**MSS:**
+
+1. User enters a `filter` command with one or more criteria.
+2. TeachAssist applies specified filter criteria to the student list.
+3. TeachAssist updates the displayed list to show only matching students.
+4. TeachAssist displays a result message showing the number of students matching the filter.
+5. Use case ends.
+
+**Extensions:**
+
+* 1a. The user enters `filter` with no criteria at all.
+    * 1a1. TeachAssist displays an error message stating that at least one filter must be provided.
+    * Use case ends.
+* 1b. A provided prefix is missing a value.
+    * 1b1. TeachAssist displays an error message indicating the missing value.
+    * Use case ends.
+* 1c. One or more filter values are invalid.
+    * 1c1. TeachAssist displays an error message indicating the valid values or range.
+    * Use case ends.
+* 2a. No student matches the filter criteria.
+    * 2a1. TeachAssist displays an empty list and a message indicating 0 students matching the filter.
+    * Use case ends.
+
+
+**Use Case: UC05 – Edit Student**<br>
+**Actor:** User<br>
+**MSS:**
+1. User enters the `edit` command specifying a target student and the fields to update.
+2. TeachAssist updates the student record with the provided changes.
+3. TeachAssist confirms that the student has been updated.
+4. Use case ends.
+
+**Extensions:**
+
+* 1a. The command format is invalid.
+    * 1a1. TeachAssist displays an error message and the correct command format.
+    * Use case ends.
+* 1b. The specified student does not exist.
+    * 1b1. TeachAssist informs the user that the specified student could not be found.
+    * Use case ends.
+
+
+**Use Case: UC06 – Mark Student Attendance**<br>
+**Actor:** User<br>
+**MSS:**
+
+1. User enters the command to mark a student's attendance for a specific student week with a status.
+2. TeachAssist updates the student's attendance record for the specified student and week.
 3. TeachAssist confirms the updated attendance status.
 4. Use case ends.
 
 **Extensions:**
 
-* 2a. The specified student does not exist.
-    * 2a1. TeachAssist informs the user and aborts the operation.
+* 1a. The command format is invalid.
+    * 1a1. TeachAssist displays an error message and the correct command format.
     * Use case ends.
-* 2b. The specified week is invalid (out of range or cancelled).
-    * 2b1. TeachAssist informs the user and aborts the operation.
+* 1b. The specified student does not exist.
+    * 1b1. TeachAssist informs the user that the student record cannot be found.
+    * Use case ends.
+* 1c. The specified week number is invalid.
+    * 1c1. TeachAssist informs the user that the week number is out of range.
+    * Use case ends.
+* 1d. The specified week is cancelled.
+    * 1d1. TeachAssist informs the user that cancelled weeks cannot be modified.
+    * Use case ends.
+* 1e. The attendance status is invalid or already set.
+    * 1e1. TeachAssist informs the user of valid statuses or that the status is already assigned.
     * Use case ends.
 
-**Use Case: UC06 – Add Academic Notes**<br>
+
+**Use Case: UC07 – Cancel Tutorial Week**<br>
 **Actor:** User<br>
 **MSS:**
 
-1. User selects a student.
-2. User enters the add note command.
-3. TeachAssist requests the note content.
-4. User enters the note.
-5. TeachAssist attaches the note with a timestamp to the student profile.
-6. TeachAssist confirms the addition.
-7. Use case ends.
+1. User enters a command to cancel a specific week for a course and tutorial group.
+2. TeachAssist marks the specified week as cancelled for all students in the tutorial group.
+3. TeachAssist confirms the cancellation.
+4. Use case ends.
+
+**Extensions:**
+
+* 1a. The command format is invalid.
+    * 1a1. TeachAssist displays an error message and the correct command format.
+    * Use case ends.
+* 1b. The course or tutorial group does not exist.
+    * 1b1. TeachAssist informs the user that the course-tutorial pair cannot be found.
+    * Use case ends.
+* 1c. The week number is invalid.
+    * 1c1. TeachAssist informs the user that the week number is out of range.
+    * Use case ends.
+* 1d. The week is already cancelled.
+    * 1d1. TeachAssist informs the user that the week is already cancelled.
+    * Use case ends.
 
 
-**Use Case: UC08 – Update Student Progress Status**<br>
+**Use Case: UC08 – Uncancel Tutorial Week**<br>
 **Actor:** User<br>
 **MSS:**
 
-1. User enters a command to update a student’s progress status to a specific status.
-3. TeachAssist updates the student progress status.
-4. TeachAssist confirms the update.
-5. Use case ends.
+1. User enters a command to uncancel a specific week for a course and tutorial group.
+2. TeachAssist restores the previously cancelled week to active status for all students in the tutorial group.
+3. TeachAssist confirms the uncancellation.
+4. Use case ends.
 
-**Extensions**
+**Extensions:**
+
+* 1a. The command format is invalid.
+    * 1a1. TeachAssist displays an error message and the correct command format.
+    * Use case ends.
+* 1b. The course or tutorial group does not exist.
+    * 1b1. TeachAssist informs the user that the course-tutorial pair cannot be found.
+    * Use case ends.
+* 1c. The week number is invalid.
+    * 1c1. TeachAssist informs the user that the week number is out of range.
+    * Use case ends.
+* 1d. The week was not cancelled.
+    * 1d1. TeachAssist informs the user that the week was not cancelled.
+    * Use case ends.
+
+
+**Use Case: UC09 – Update Student Progress Status**<br>
+**Actor:** User<br>
+**MSS:**
+
+1. User enters a command to update a student’s progress status.
+2. TeachAssist updates the student’s progress status.
+3. TeachAssist displays a success message confirming the update.
+4. Use case ends.
+
+**Extensions:**
 
 * 1a. The command format is invalid.
     * 1a1. TeachAssist displays an error message and the correct command format.
@@ -789,123 +825,95 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
     * 1c1. TeachAssist informs the user of the valid progress statuses.
     * Use case ends.
 
-**Use Case: UC09 – View Student Details**<br>
+
+**Use Case: UC10 – Add Remark to Student**<br>
 **Actor:** User<br>
 **MSS:**
 
-1. User issues the `view` command with a student index.
-2. TeachAssist displays the selected student's detailed information and remark entries in the UI.
-3. Use case ends.
+1. User enters the command to add a remark to a specific student.
+2. TeachAssist adds the remark with the current date to the specified student's record.
+3. TeachAssist shows a success message confirming that the remark was added.
+4. Use case ends.
 
-**Extensions**
-
-* 1a. The specified index is out of range.
-    * 1a1. TeachAssist informs the user that the specified student does not exist and aborts the operation.
-    * Use case ends.
-
-**Use Case: UC10 – View Help Command** <br>
-**Actor:** User <br>
-**MSS:**
-
-1. User enters the help command.
-2. TeachAssist retrieves the list of supported commands.
-3. TeachAssist displays the command list with brief descriptions.
-4. User reviews the available commands.
-5. Use case ends
-
-**Use Case: UC11 – Delete Student** <br>
-**Actor:** User <br>
-**MSS:**
-
-1. User enters a command to delete a student.
-2. TeachAssist validates the command and identifies the student record to be deleted.
-3. TeachAssist displays the student details and asks the user to confirm the deletion.
-4. User enters a confirmation response.
-5. TeachAssist deletes the student record from the system.
-6. Use case ends.
-
-**Extensions**
+**Extensions:**
 
 * 1a. The command format is invalid.
     * 1a1. TeachAssist displays an error message and the correct command format.
     * Use case ends.
-* 2a. The specified student does not exist.
-    * 2a1. TeachAssist informs the user that the student record cannot be found.
-    * Use case ends.
-* 4a. The user declines the deletion.
-    * 4a1. TeachAssist cancels the deletion.
-    * Use case ends.
-* 4b. The confirmation response is invalid.
-    * 4b1. TeachAssist informs the user to enter a valid confirmation response.
+* 1b. The remark text is empty or exceeds the allowed length.
+    * 1b1. TeachAssist displays an error message.
     * Use case ends.
 
-**Use Case: UC12 – View Student List** <br>
-**Actor:** User <br>
+
+**Use Case: UC11 – Delete Remark from Student**<br>
+**Actor:** User<br>
 **MSS:**
 
-1.User enters the command to view all students.
-2. TeachAssist retrieves all student records.
-3. TeachAssist displays the list of students.
-4. Use case ends.
-
-**Use Case: UC13 – List Students (reset view / clear filters)** <br>
-**Actor:** User <br>
-**MSS:**
-
-1. User enters the `list` command.
-2. TeachAssist displays the full student list (any active filters are cleared for the displayed view).
-3. Use case ends.
-
-**Use Case: UC14 – Filter Student List** <br>
-**Actor:** User <br>
-**MSS:**
-
-1. User enters a `filter` command with one or more criteria (e.g., `crs/`, `tg/`, `p/`, `abs/`).
-2. TeachAssist updates the displayed student list to show only students matching all provided criteria.
-3. TeachAssist displays feedback summarising the active filter and the number of matching students.
+1. User enters the command to delete a remark from a specific student.
+2. TeachAssist removes the specified remark from the specified student's record.
+3. TeachAssist shows a success message confirming that the remark was deleted.
 4. Use case ends.
 
 **Extensions:**
 
-* 2a. A required parameter value is missing for one of the criteria (e.g., `crs/` with no course id).
-    * 2a1. TeachAssist informs the user of the missing value and shows correct usage.
+* 1a. The command format is invalid.
+    * 1a1. TeachAssist displays an error message and the correct command format.
     * Use case ends.
-* 2b. A provided criterion has an invalid format (e.g., malformed tutorial group `tg/@@@`).
-    * 2b1. TeachAssist informs the user about the invalid format for that criterion.
+* 1b. The specified student does not exist.
+    * 1b1. TeachAssist displays an error message indicating that the student index provided is invalid.
     * Use case ends.
-* 2c. A provided progress value is not one of the supported statuses.
-    * 2c1. TeachAssist informs the user of valid progress values and rejects the filter.
-    * Use case ends.
-* 2d. The absence count (`abs/`) is not a non-negative integer.
-    * 2d1. TeachAssist informs the user that absence must be a non-negative integer.
-    * Use case ends.
-* 2e. The combination of criteria is valid but yields no matches.
-    * 2e1. TeachAssist displays an empty list and a message indicating that no students match the filter.
-    * Use case ends.
-* 2f. Multiple criteria are supplied.
-    * 2f1. TeachAssist combines criteria using logical AND semantics and updates the list accordingly.
-    * Use case ends.
-* 2g. The user issues `filter` while another view or filter is active.
-    * 2g1. TeachAssist replaces the currently displayed view with the new filtered results.
+* 1c. The specified remark does not exist.
+    * 1c1. TeachAssist informs the user that the remark index is invalid.
     * Use case ends.
 
-**Use Case: UC15 – Find Students** <br>
-**Actor:** User <br>
+
+**Use Case: UC12 – View Student Details**<br>
+**Actor:** User<br>
 **MSS:**
 
-1. User enters a `find` command with one or more keywords (e.g., parts of a name or student id).
-2. TeachAssist searches the student records for matches and updates the displayed list to show matching students.
-3. TeachAssist displays feedback indicating the number of students found and the search terms used.
-4. Use case ends.
+1. User enters the `view` command with a student index.
+2. TeachAssist displays the student's full details and remarks in the View Window.
+3. TeachAssist highlights the corresponding student row in the list.
+4. TeachAssist displays a success message confirming which student is being viewed.
+5. Use case ends.
 
 **Extensions:**
 
-* 2a. The `find` command contains illegal characters or is an empty query.
-    * 2a1. TeachAssist informs the user of the correct syntax for the `find` command.
+* 1a. The index is invalid or out of range.
+    * 1a1. TeachAssist displays an error message.
     * Use case ends.
-* 2b. No students match the query.
-    * 2b1. TeachAssist displays an empty list and a message such as "No students found for: <query>".
+
+
+**Use Case: UC13 – Delete Student**<br>
+**Actor:** User<br>
+**MSS:**
+
+1. User enters a command to delete a student.
+2. TeachAssist displays the student details and asks the user to confirm the deletion.
+3. User enters `yes`.
+4. TeachAssist deletes the student record from the system.
+5. Use case ends.
+
+**Extensions:**
+
+* 1a. The command format is invalid.
+    * 1a1. TeachAssist displays an error message and the correct command format.
     * Use case ends.
+* 1b. The specified student does not exist.
+    * 1b1. TeachAssist informs the user that the student record cannot be found.
+    * Use case ends.
+* 3a. The user enters `no`.
+    * 3a1. TeachAssist cancels the deletion.
+    * Use case ends.
+* 3b. The user enters another command instead of `yes` or `no`.
+    * 3b1. TeachAssist cancels the pending deletion.
+    * 3b2. TeachAssist processes the new command.
+    * Use case resumes from the relevant step of the new command.
+* 3c. The user enters an invalid confirmation response that is not a recognised command.
+    * 3c1. TeachAssist cancels the pending deletion.
+    * 3c2. TeachAssist displays an error message.
+    * Use case ends.
+
 
 ### Non-Functional Requirements
 1. Performance
@@ -930,516 +938,486 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 Given below are instructions to test the app manually.
 
-<box type="info" seamless></box>
+<box type="info" seamless>
 
 **Note:** These instructions only provide a starting point for testers to work on;
 testers are expected to do more *exploratory* testing.
-
-</box></box>
+</box>
 
 ### Launch and shutdown
 
 1. Initial launch
 
-    1. _{Fill in}_
+   **Test case:** Download the jar file and copy to an empty folder. Run the app using java -jar TeachAssist.jar.
 
-    2. _{Fill in expected behaviour}_
+   **Expected behavior:** The GUI should launch with a default window size and populate with sample data.
 
 2. Saving window preferences
 
-    1. _{Fill in}_
+   **Test case:** Resize the window to a different size, or move it to a different part of the screen. Close the app using the exit command and relaunch it.
 
-    2. _{Fill in expected behaviour}_
+   **Expected behavior:** The app window should reappear with the same size and at the same position as it was before closing.
 
 3. Shutdown
 
-    1. _{Fill in}_
+    **Test case:** Enter exit into the command box
 
-    2. _{Fill in expected behaviour}_
+    **Expected behavior**: The application closes immediately and the terminal process terminates.
 
-### Help command (`help`) — manual tests
-
-1. Open help via command
-
-    1. Test case: Type `help` in the command box and press Enter.
-
-    2. Expected: A help window or pane opens showing the list of supported commands and short usage examples.
-
-2. Re-open / focus when already open
-
-    1. Test case: With help open, type `help` again or press the help accelerator (F1).
-
-    2. Expected: The help window/pane gains focus (no duplicate windows opened). If a separate window is used, it is brought to the front.
-
-3. Accelerator / focus edge cases
-
-    1. Test case: Press F1 while focus is in `CommandBox` or `ResultDisplay` (text input controls).
-
-    2. Expected: Help opens or is focused despite text input controls consuming function keys (verify fallback event filter works).
-
-4. Content correctness
-
-    1. Test case: Inspect help content and verify the `find`, `filter`, `view`, and `help` entries match the documented usage and examples.
-
-    2. Expected: Command words and sample usages are accurate and executable.
-
-### Find command (`find`) — manual tests
-
-1. Basic single-keyword search
-
-    1. Test case: Enter `find Alice` where "Alice" exists in sample data.
-
-    2. Expected: Displayed list shows students whose names contain a word starting with "Alice" (case-insensitive). Result count shown matches number of displayed rows.
-
-2. Multiple-keyword search
-
-    1. Test case: Enter `find Al Bob` where both keywords match different students.
-
-    2. Expected: Displayed list contains students matching any of the keywords (OR across keywords). No duplicates; count is correct.
-
-3. Case and prefix matching
-
-    1. Test case: Enter `find ann` to match "Annabelle" and `find ANN`.
-
-    2. Expected: Matching is case-insensitive and supports prefix matching as documented.
-
-4. Empty or whitespace-only query
-
-    1. Test case: Enter `find` with no keywords or only whitespace.
-
-    2. Expected: Command rejected with a usage/error message; displayed list remains unchanged.
-
-5. Illegal characters
-
-    1. Test case: Enter `find @@@` or unusual punctuation.
-
-    2. Expected: Behaviour consistent with documentation (either treated as literal keyword or rejected); error message clarifies allowed input if rejected.
-
-6. Interaction with filters
-
-    1. Test case: Apply a `filter` (e.g., `filter crs/CS2103T`), then `find Alice` where Alice is outside the filter.
-
-    2. Expected: Document observed behaviour (whether `find` searches within filtered view or full dataset) and ensure it matches the Developer Guide's statement.
-
-7. After mutations
-
-    1. Test case: Add a student matching `find` keyword, then run `find`; delete a matching student and run `find` again.
-
-    2. Expected: Results reflect current model state (add appears, deleted entries disappear).
-
-### Filter command (`filter`) — manual tests
-
-1. Single-criterion filters
-
-    1. Test case: `filter crs/CS2103T` ; `filter tg/T01` ; `filter p/on_track` ; `filter abs/2`.
-
-    2. Expected: Each command restricts the displayed list to students matching the given criterion; feedback shows the match count.
-
-2. Multi-criterion filters (AND semantics)
-
-    1. Test case: `filter crs/CS2103T tg/T01 p/on_track`.
-
-    2. Expected: Displayed list contains only students satisfying all supplied criteria; removing a criterion expands the set.
-
-3. Missing parameter values
-
-    1. Test case: `filter crs/` or `filter abs/`
-
-    2. Expected: Command rejected with a message indicating the missing value and correct usage. Displayed list unchanged.
-
-4. Invalid formats
-
-    1. Test case: `filter tg/@@@` or `filter abs/xyz` or `filter p/unsupported_status`.
-
-    2. Expected: Rejected with a clear error message explaining valid formats/values.
-
-5. Absence boundary checks
-
-    1. Test case: `filter abs/0`, `filter abs/9999`, `filter abs/-1`.
-
-    2. Expected: `abs/0` matches students with zero absences; very large numbers return empty set (or behave consistently); negative numbers are rejected.
-
-6. No-match combinations
-
-    1. Test case: Combine criteria that yield no results.
-
-    2. Expected: Displayed list becomes empty and feedback indicates no matches.
-
-7. Interaction with `list` and subsequent commands
-
-    1. Test case: Apply a `filter`, then run `list`, then `filter` again.
-
-    2. Expected: `list` resets the displayed view to all students; subsequent `filter` applies to the full dataset.
-
-### Adding a student
+### Adding a student (`add`)
 
 1. Adding a student with valid fields
 
-    1. _{Fill in test case}_
+    **Test case:** `add n/John Doe id/A0123456X e/johnd@u.nus.edu crs/CS2103T tg/T01 tel/@johndoe`
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** A new student is added to the list. Success message shown: `"New person added: John Doe; Student ID: A0123456X; Email: johnd@u.nus.edu; Course ID: CS2103T; TGroup: T01; Tele: @johndoe"`.
 
 2. Adding a student with missing required fields
 
-    1. _{Fill in test case}_
+    **Test case:** `add n/John Doe id/A0123456X` (missing `COURSE_ID` and `TUTORIAL_GROUP`)
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** Command rejected with an error message showing the correct usage format. All of `n/`, `id/`, `crs/`, `tg/` are required.
 
 3. Adding a student with invalid field values
 
-    1. _{Fill in test case}_
+    **Test case:** `add n/John123 id/A0123456X e/johnd@u.nus.edu crs/CS2103T tg/T01`
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** Command rejected with an error message indicating the name constraint (names should only contain alphabetical characters and spaces).
 
 4. Adding a duplicate student
 
-    1. _{Fill in test case}_
+    **Test case:** Add a student whose `STUDENT_ID`, `EMAIL`, or `TELEGRAM_USERNAME` matches an existing student in the same `COURSE_ID` and `TUTORIAL_GROUP`.
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** Command rejected with error message: `"This person already exists in the address book"`.
 
-### Editing a student
+### Editing a student (`edit`)
 
 1. Editing a student with valid fields
 
-    1. _{Fill in test case}_
+    **Test case:** `edit 1 n/Jane Doe e/janed@u.nus.edu`
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** The student at index 1 has their name updated to "Jane Doe" and email updated. Success message shown: `"Edited Person: Jane Doe; Student ID: ...; Email: janed@u.nus.edu; ..."`.
 
 2. Editing a student with invalid fields
 
-    1. _{Fill in test case}_
+    **Test case:** `edit 1 e/invalid-email-format`
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** Command rejected with an error message indicating the email constraint.
 
 3. Editing a non-existent student
 
-    1. _{Fill in test case}_
+    **Test case:** `edit 999 n/Jane Doe` (where index 999 exceeds the displayed list size)
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** Command rejected with error message: `"The student index provided is invalid"`.
 
 4. Editing with missing edit fields
 
-    1. _{Fill in test case}_
+    **Test case:** `edit 1` (no fields to edit specified)
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** Command rejected with error message: `"At least one field to edit must be provided."`.
 
-### Deleting a student
+
+### Viewing Help Window (`help`)
+
+1. Opening the Help Window with `help` command
+
+    **Test case:** Type `help` and press Enter.
+
+    **Expected behaviour:** The Help Window opens. Success message shown: `"Opened help window."`.
+
+2. Opening the Help Window with the keyboard shortcut
+
+    **Test case:** Press the F1 key (or fn + F1 on Mac).
+
+    **Expected behaviour:** The Help Window opens. Success message shown: `"Opened help window."`.
+
+3. Opening the Help Window with extra text after the `help` command
+
+    **Test case:** Type `help icecream` (with extra text after `help`).
+
+    **Expected behaviour:** The Help Window still opens (extra text is ignored). Success message shown: `"Opened help window."`.
+
+4. Window Focus Behavior
+
+    **Prerequisite:** The Help Window is already open but not minimized.
+
+    **Test case:** Type `help` or press F1 again while the main window has focus.
+
+    **Expected behaviour:** The existing Help Window is brought to the front/focus. No duplicate window is created.
+
+
+### Finding a Student (`find`)
+
+1. Single-keyword search
+
+    **Test case:** Enter `find Alice` where "Alice" exists in sample data.
+
+    **Expected behaviour:** Displayed list shows students whose names contain a word starting with "Alice" (case-insensitive). Success message shown: `"X students listed!"` where X is the number of matching students.
+
+2. Multiple-keyword search
+
+    **Test case:** Enter `find Al Bob` where both keywords match different students.
+
+    **Expected behaviour:** Displayed list contains students matching any of the keywords (OR across keywords). No duplicates. Success message shown: `"X students listed!"` where X is the number of matching students.
+
+3. Case and prefix matching
+
+    **Test case:** Enter `find ann` to match "Annabelle" and `find ANN`.
+
+    **Expected behaviour:** Both commands produce the same results. Matching is case-insensitive and supports prefix matching (e.g., "ann" matches any name word starting with "ann").
+
+4. Empty or whitespace-only query
+
+    **Test case:** Enter `find` with no keywords or only whitespace.
+
+    **Expected behaviour:** Command rejected with error message: `"Find command requires at least one keyword."` followed by the `find` command usage. Displayed list remains unchanged.
+
+5. Invalid special characters
+
+    **Test case:** `find A123` or `find @@@`.
+
+    **Expected behaviour:** Command rejected with error message: `"Keywords should contain alphabetic characters separated by spaces only."` followed by the `find` command usage.
+
+### Filtering the Student List (`filter`)
+
+1. Single criterion filtering
+
+    **Test case:** `filter crs/CS2103T`
+
+    **Expected behaviour:** List displays only students in course CS2103T. Success message shown: `"There are X students matching this filter."` where X is the number of matching students.
+
+2. Multiple criteria filtering
+
+    **Test case:** `filter crs/CS2103T tg/T01 abs/2`
+
+    **Expected behaviour:** List displays only students who satisfy all criteria — course is CS2103T AND tutorial group is T01 AND absence count ≥ 2 (AND logic). Success message shown: `"There are X students matching this filter."`.
+
+3. No matches for filter
+
+    **Test case:** `filter crs/CS9999` (a non-existent course).
+
+    **Expected behaviour:** List becomes empty; Success message shown: `"There are 0 students matching this filter."`.
+
+4. Absence threshold checks
+
+    **Test case:** `filter abs/5`
+
+    **Expected behaviour:** Matches only students with at least 5 absences. Success message shown: `"There are X students matching this filter."`.
+
+5. No filter fields
+
+    **Test case:** `filter` (empty command, no filter criteria).
+
+    **Expected behaviour:** Command rejected with error message: `"At least one filter must be provided."` followed by the filter command usage.
+
+### Deleting a student (`delete`)
 
 1. Deleting a student by index
 
-    1. **Test case:** `delete 1`
+    **Test case:** `delete 1`
 
-    2. **Expected behaviour:** If index `1` refers to a valid student in the current filtered list, TeachAssist does not delete the student immediately. Instead, it shows a confirmation message asking the user to type `yes` to confirm or `no` to cancel.
+    **Expected behaviour:** If index `1` refers to a valid student in the current filtered list, TeachAssist does not delete the student immediately. Instead, it shows a confirmation message: `"Are you sure you want to delete <student name>? Type 'yes' to confirm or 'no' to cancel."`.
 
 2. Deleting a student by student details
 
-    1. **Test case:** `delete id/A1234567X crs/CS2103T tg/T01`
+    **Test case:** `delete id/A1234567X crs/CS2103T tg/T01`
 
-    2. **Expected behaviour:** If a student matching the given `StudentId`, `CourseId`, and `TGroup` exists in the current filtered list, TeachAssist does not delete the student immediately. Instead, it shows a confirmation message asking the user to type `yes` to confirm or `no` to cancel.
+    **Expected behaviour:** If a student matching the given `StudentId`, `CourseId`, and `TGroup` exists in the entire TeachAssist list, TeachAssist does not delete the student immediately. Instead, it shows a confirmation message asking the user to type `yes` to confirm or `no` to cancel.
 
 3. Confirming a deletion
 
-    1. **Test case:** Enter a valid delete command such as `delete 1`, then enter `yes`
+    **Test case:** Enter a valid delete command such as `delete 1`, then enter `yes`.
 
-    2. **Expected behaviour:** The pending deletion is executed, the student is removed from TeachAssist, and a success message is shown.
+    **Expected behaviour:** The pending deletion is executed, the student is removed from TeachAssist, and a success message is shown: `"Deleted Person: <student details>"`.
 
 4. Cancelling a deletion
 
-    1. **Test case:** Enter a valid delete command such as `delete 1`, then enter `no`
+    **Test case:** Enter a valid delete command such as `delete 1`, then enter `no`.
 
-    2. **Expected behaviour:** The pending deletion is cancelled, no student is removed, and a cancellation message is shown.
+    **Expected behaviour:** The pending deletion is cancelled, no student is removed, and a cancellation message is shown: `"Delete operation cancelled."`.
 
 5. Entering another command while deletion is pending
 
-    1. **Test case:** Enter a valid delete command such as `delete 1`, then enter another command such as `list`
+    **Test case:** Enter a valid delete command such as `delete 1`, then enter another command such as `list`.
 
-    2. **Expected behaviour:** The pending deletion is cleared and the new command is processed normally. No student is deleted unless the user re-enters the delete command and confirms it.
+    **Expected behaviour:** The pending deletion is cleared and the new command (`list`) is processed normally. No student is deleted unless the user re-enters the delete command and confirms it.
 
 6. Deleting with invalid command format
 
-    1. **Test case:** `delete abc`
+    **Test case:** `delete abc`
 
-    2. **Expected behaviour:** The command is rejected, no confirmation is requested, and an error message is shown.
+    **Expected behaviour:** The command is rejected, no confirmation is requested, and an error message is shown indicating invalid command format.
 
 7. Deleting with invalid index format
 
-    1. **Test case:** `delete -1`
+    **Test case:** `delete -1`
 
-    2. **Expected behaviour:** The command is rejected, no confirmation is requested, and an error message is shown to indicate that the index is invalid.
+    **Expected behaviour:** The command is rejected, no confirmation is requested, and an error message is shown: `"Invalid index number"`.
 
 8. Deleting a non-existent student by details
 
-    1. **Prerequisite:** Ensure that no student in the currently displayed list matches these 3 fields: `id/A0000000Z crs/CS9999 tg/T99`
+    **Prerequisite:** Ensure that no student in the address book matches these 3 fields: `id/A0000000Z crs/CS9999 tg/T99`
 
-    2. **Test case:** `delete id/A0000000Z crs/CS9999 tg/T99`
+    **Test case:** `delete id/A0000000Z crs/CS9999 tg/T99`
 
-    3. **Expected behaviour:** The command is rejected because no matching student exists in the current filtered list, no confirmation is requested, and an error message is shown.
+    **Expected behaviour:** The command is rejected with error message: `"No student matching the given student ID, course ID, and tutorial group was found."`. No confirmation is requested.
 
-### Updating progress
+### Updating a student's progress (`updateprogress`)
 
 1. Updating progress with a valid status
 
-    1. **Test case:** `progress 1 p/ON_TRACK`
+    **Test case:** `updateprogress 1 p/on_track`
 
-    2. **Expected behaviour:** If index `1` refers to a valid student in the current filtered list and the progress status is valid, the student’s progress is updated to `ON_TRACK` and a success message is shown.
+    **Expected behaviour:** If index `1` refers to a valid student in the current filtered list, the student's progress is updated to `ON_TRACK` and a success message is shown: `"Updated progress for student: <student details>. New progress: ON_TRACK"`. Note: progress values are case-insensitive (`ON_TRACK` and `on_track` both work).
 
 2. Updating progress with an invalid status
 
-    1. **Test case:** `progress 1 p/GOOD`
+    **Test case:** `updateprogress 1 p/GOOD`
 
-    2. **Expected behaviour:** The command is rejected, no student record is updated, and an error message is shown to indicate that the progress status is invalid.
+    **Expected behaviour:** The command is rejected, no student record is updated, and an error message is shown: `"Invalid progress value. Allowed values are: on_track, needs_attention, at_risk, clear."`.
 
 3. Updating progress with an invalid index
 
-    1. **Test case:** `progress 999 p/AT_RISK`
+    **Test case:** `updateprogress 999 p/at_risk`
 
-    2. **Expected behaviour:** If index `999` is outside the bounds of the current filtered list, the command is rejected, no student record is updated, and an error message is shown.
+    **Expected behaviour:** If index `999` is outside the bounds of the current filtered list, the command is rejected, no student record is updated, and an error message is shown: `"The student index provided is invalid"`.
 
-4. Removing progress using `NOT_SET`
+4. Removing progress using `clear` or `not_set`
 
-    1. **Test case:** `progress 1 p/NOT_SET`
+    **Test case:** `updateprogress 1 p/clear` (or equivalently `updateprogress 1 p/not_set`)
 
-    2. **Expected behaviour:** If index `1` refers to a valid student in the current filtered list, the student’s progress is updated to `NOT_SET`. The progress tag is removed from the student card in the UI, and a success message is shown.
+    **Expected behaviour:** If index `1` refers to a valid student in the current filtered list, the student's progress is reset to `NOT_SET`. The progress tag is removed from the student card in the UI, and a success message is shown: `"Cleared progress for student: <student details>"`.
 
 5. Updating progress with invalid command format
 
-    1. **Test case:** `progress p/ON_TRACK`
+    **Test case:** `updateprogress p/on_track` (missing index)
 
-    2. **Expected behaviour:** The command is rejected because the required student index is missing, no student record is updated, and an error message is shown.
-### Marking attendance
+    **Expected behaviour:** The command is rejected because the required student index is missing, no student record is updated, and an error message is shown with the correct usage format.
+
+### Marking a student's attendance (`marka`)
 
 1. Marking attendance with valid input
 
-   1. Test case: `markattendance 1 week/3 sta/Y`
+    **Test case:** `marka 1 wk/3 s/Y`
 
-   2. Expected: Student at index 1 has week 3 marked as attended. Success message displayed.
+    **Expected behaviour:** Student at index 1 has week 3 marked as attended. Success message: `"Week 3 marked as Y (Present) for: <student name> (<student ID>)"`.
 
 2. Marking attendance with invalid week
 
-   1. Test case: `markattendance 1 week/20 sta/Y`
+    **Test case:** `marka 1 wk/20 s/Y`
 
-   2. Expected: Command rejected with invalid week message.
+    **Expected behaviour:** Command rejected with error message: `"Invalid week number. Valid range: 1 to 13."`.
 
 3. Marking attendance with cancelled week
 
-   1. Test case:
-      `cancelweek crs/CS2103T tg/T01 week/3`
-      `markattendance 1 week/3 sta/Y`
+    **Test case:**
+    `cancelw crs/CS2103T tg/T01 wk/3`
+    then
+    `marka 1 wk/3 s/Y`
 
-   2. Expected: Command rejected. Week is cancelled.
+    **Expected behaviour:** Command rejected with error message: `"Week 3 is cancelled and cannot be marked."`.
 
 4. Marking attendance duplicate status
 
-   1. Test case:
-      `markattendance 1 week/2 sta/Y`
-      `markattendance 1 week/2 sta/Y`
+    **Test case:**
+    `marka 1 wk/2 s/Y`
+    then
+    `marka 1 wk/2 s/Y`
 
-   2. Expected: Second command rejected.
+    **Expected behaviour:** Second command rejected with error message: `"Week 2 already has status 'Y' for <student name> (<student ID>)."`.
 
 5. Marking attendance for non-existent student
 
-   1. Test case: `markattendance 999 week/2 sta/Y`
+    **Test case:** `marka 999 wk/2 s/Y`
 
-   2. Expected: Invalid index error.
+    **Expected behaviour:** Command rejected with error message: `"The person index provided is invalid."`.
 
-### Cancelling a week
+### Cancelling a week (`cancelw`)
 
 1. Cancelling a week with valid input
 
-   1. Test case: `cancelweek crs/CS2103T tg/T01 week/5`
+    **Test case:** `cancelw crs/CS2103T tg/T01 wk/5`
 
-   2. Expected: Week 5 marked cancelled for all students.
+    **Expected behaviour:** Week 5 cancelled for all students in CS2103T T01. Success message: `"Week 5 cancelled for course CS2103T tutorial T01."`.
 
 2. Cancelling already cancelled week
 
-   1. Test case: Run command twice
+    **Test case:** Run `cancelw crs/CS2103T tg/T01 wk/5` twice.
 
-   2. Expected: Second command rejected.
+    **Expected behaviour:** Second command rejected with error message: `"Week 5 is already cancelled for course CS2103T tutorial T01."`.
 
 3. Cancelling invalid week
 
-   1. Test case: `cancelweek crs/CS2103T tg/T01 week/20`
+    **Test case:** `cancelw crs/CS2103T tg/T01 wk/20`
 
-   2. Expected: Invalid week error.
+    **Expected behaviour:** Command rejected with error message: `"Invalid week number. Valid range: 1 to 13."`.
 
 4. Cancelling non-existent course/tutorial
 
-   1. Test case: `cancelweek crs/CS9999 tg/T99 week/2`
+    **Test case:** `cancelw crs/CS9999 tg/T99 wk/2`
 
-   2. Expected: Course/tutorial not found.
+    **Expected behaviour:** Command rejected with error message: `"Course CS9999 with tutorial T99 does not exist and cannot be cancelled."`.
 
-### Uncancelling a week
+### Uncancelling a week (`uncancelw`)
 
 1. Uncancelling valid week
 
-   1. Test case:
-      `cancelweek crs/CS2103T tg/T01 week/4`
-      `uncancelweek crs/CS2103T tg/T01 week/4`
+    **Test case:**
+    `cancelw crs/CS2103T tg/T01 wk/4`
+    then
+    `uncancelw crs/CS2103T tg/T01 wk/4`
 
-   2. Expected: Week restored for all students.
+    **Expected behaviour:** Week 4 restored for all students. Success message: `"Week 4 uncancelled for course CS2103T tutorial T01."`.
 
 2. Uncancelling non-cancelled week
 
-   1. Test case: `uncancelweek crs/CS2103T tg/T01 week/3`
+    **Test case:** `uncancelw crs/CS2103T tg/T01 wk/3` (where week 3 has not been cancelled)
 
-   2. Expected: No change.
+    **Expected behaviour:** Command rejected with error message: `"Week 3 is not cancelled for course CS2103T tutorial T01."`.
 
 3. Uncancelling invalid week
 
-   1. Test case: `uncancelweek crs/CS2103T tg/T01 week/20`
+    **Test case:** `uncancelw crs/CS2103T tg/T01 wk/20`
 
-   2. Expected: Invalid week error.
+    **Expected behaviour:** Command rejected with error message: `"Invalid week number. Valid range: 1 to 13."`.
 
 4. Uncancelling non-existent course/tutorial
 
-   1. Test case: `uncancelweek crs/CS9999 tg/T99 week/1`
-   2. Expected: Course/tutorial not found.
+    **Test case:** `uncancelw crs/CS9999 tg/T99 wk/1`
 
-### Adding a remark
+    **Expected behaviour:** Command rejected with error message: `"Course CS9999 with tutorial T99 does not exist and cannot be uncancelled."`.
+
+### Adding a remark (`remark`)
 
 1. Adding a remark with valid input
 
-    1. _{Fill in test case}_
+    **Test case:** `remark 1 txt/Participates actively in class`
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** A remark with the text "Participates actively in class" and the current date is added to the student at index 1. Success message shown: 
+    ```
+    Added remark to Person:
+    <student details>
+    Remark: Participates actively in class
+    ```
 
-2. Adding a remark with invalid input
+2. Adding a remark with missing text
 
-    1. _{Fill in test case}_
+    **Test case:** `remark 1 txt/`
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** Command rejected with error message: `"Remark text cannot be empty."`.
 
-3. Adding a remark to a non-existent student
+3. Adding a remark with missing prefix
 
-    1. _{Fill in test case}_
+    **Test case:** `remark 1`
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** Command rejected with an error message showing the correct usage format.
 
-### Viewing student details / remarks
+4. Adding a remark with invalid index
+
+    **Test case:** `remark 999 txt/Some remark` (where index 999 exceeds the displayed list size)
+
+    **Expected behaviour:** Command rejected with error message: `"The student index provided is invalid"`.
+
+### Viewing student details / remarks (`view`)
 
 1. Viewing a student with valid input
 
-    1. Test case: Ensure a student is visible in the current displayed list, then enter `view 1` (or the appropriate index) and press Enter.
+    **Test case:** Ensure a student is visible in the current displayed list, then enter `view 1` and press Enter.
 
-    2. Expected: The detail pane displays the selected student's full information (name, student ID, course, tutorial group, email, tele), attendance summary and remark entries. All fields render correctly; long text wraps or scrolls.
+    **Expected behaviour:** The detail pane displays the selected student's full information (name, student ID, course, tutorial group, email, tele), attendance summary and remark entries. Success message shown: `"Viewing student: <student details>"`.
 
 2. Viewing a non-existent / out-of-range index
 
-    1. Test case: Enter `view 9999` (index greater than displayed list size) or `view 0` if 0 is invalid.
+    **Test case:** Enter `view 9999` (index greater than displayed list size) or `view 0`.
 
-    2. Expected: Command rejected with an "invalid index" or usage error message; detail pane remains unchanged.
+    **Expected behaviour:** Command rejected with error message: `"The student index provided is invalid"`; detail pane remains unchanged.
 
-3. Viewing after filtering
 
-    1. Test case: Apply a `filter` that changes the displayed list, then `view 1` to view the first item in the filtered list.
-
-    2. Expected: `view` uses the current filtered ordering and index; the pane shows the selected student from the filtered view.
-
-4. View and delete interaction
-
-    1. Test case: `view 1` to show a student's details, then delete that student (`delete 1` + confirm).
-
-    2. Expected: After deletion, the detail pane is cleared or replaced by a placeholder message indicating no student is selected; the UI remains stable and does not throw exceptions.
-
-5. Repeated view commands
-
-    1. Test case: Call `view 1` multiple times in succession.
-
-    2. Expected: Behaviour is idempotent; repeated calls simply refresh the same details without error.
-
-6. Remarks-heavy student
-
-    1. Test case: View a student with many or long remarks.
-
-    2. Expected: Remarks list scrolls if needed; entries show timestamps and content correctly; no layout overflow.
-
-3. Re-opening the view when it is already open
-
-    1. _{Fill in test case}_
-
-    2. _{Fill in expected behaviour}_
-
-### Listing students
+### Listing students (`list`)
 
 1. Listing all students
 
-    1. _{Fill in test case}_
+    **Test case:** First apply a filter (e.g., `filter crs/CS2103T`), then enter `list`.
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** The full student list is displayed (all filters cleared), sorted alphabetically by name. Success message shown: `"Listed all persons"`.
 
-### Clearing the student list / sample data
+### Clearing the student list / sample data (`clear`)
 
 1. Clearing all students
 
-    1. _{Fill in test case}_
+    **Test case:** Ensure the list has at least one student, then enter `clear`.
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** All student records are removed from TeachAssist. The list becomes empty. Success message shown: `"Address book has been cleared!"`.
 
 2. Clearing when the list is already empty
 
-    1. _{Fill in test case}_
+    **Test case:** Enter `clear` when the student list is already empty (e.g., after a previous `clear`).
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** The command succeeds with the same message: `"Address book has been cleared!"`. No error is shown.
 
-### Clearing filters
+### Clearing filters (`list`)
+
+Note: There is no dedicated `clearfilter` command. To reset any active filter and return to the full student list, use the `list` command.
 
 1. Clearing an active filter
 
-    1. _{Fill in test case}_
+    **Test case:** First apply a filter (e.g., `filter crs/CS2103T`), verify the list is filtered, then enter `list`.
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** The full student list is restored, sorted alphabetically by name. All filters are cleared. Success message shown: `"Listed all persons"`.
 
 2. Clearing when no filter is active
 
-    1. _{Fill in test case}_
+    **Test case:** Without any active filter, enter `list`.
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** The full student list is displayed (unchanged). Success message shown: `"Listed all persons"`. No error is shown.
 
 ### Saving data
 
 1. Data persistence after normal usage
 
-    1. _{Fill in test case}_
+    **Test case:** Add a student (e.g., `add n/Test Student id/A9999999Z e/test@u.nus.edu crs/CS2103T tg/T01`), then close the app using `exit` and relaunch it.
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** The newly added student appears in the list after relaunching. All data modifications (adds, edits, deletes) are persisted to `data/addressbook.json`.
 
 2. Dealing with missing data files
 
-    1. _{Fill in test case}_
+    **Test case:** Close the app, delete the `data/addressbook.json` file, then relaunch the app.
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** The app launches with the default sample data, as if running for the first time. A new `data/addressbook.json` file is created upon the next data-modifying command.
 
 3. Dealing with corrupted data files
 
-    1. _{Fill in test case}_
+    **Test case:** Close the app, open `data/addressbook.json` in a text editor and corrupt it (e.g., delete a closing brace or add invalid characters), then relaunch the app.
 
-    2. _{Fill in expected behaviour}_
+    **Expected behaviour:** The app launches with an empty student list. The corrupted data file is not loaded. A warning may be logged.
 
 ### Suggested exploratory testing
 
 1. Combining multiple commands in sequence
 
-    1. _{Fill in workflow}_
+    1. **Workflow:** Add a student → mark their attendance for weeks 1–3 → update their progress to `at_risk` → add a remark → use `view` to verify all data → edit their email → use `view` again to confirm the edit is reflected → delete the student with confirmation. Verify each step produces the correct success message and the data is consistent throughout.
 
 2. Testing invalid inputs and edge cases
 
-    1. _{Fill in workflow}_
+    1. **Workflow:** Try each command with: empty arguments, extra spaces, very long input strings, special characters in fields, index `0`, negative indices, and indices exceeding the list size. Verify that all invalid inputs produce clear, specific error messages and do not corrupt the application state.
 
 3. Testing persistence across restarts
 
-    1. _{Fill in workflow}_
+    1. **Workflow:** Make several data changes (add students, mark attendance, update progress, add remarks), then close the app with `exit`. Relaunch and verify that all changes persist. Then close without `exit` (e.g., close the window) and verify data is still saved.
 
 
 ## **Appendix: Planned Enhancements**
 
-1.Relax student name and find command keywords validation to support special characters. Currently, the name field accepts only alphabetical characters and spaces; we plan to extend this to support names containing hyphens, apostrophes, and other common punctuation, such as “O’Connor” and “Smith-Jones.”
+1. Relax student name and find command keywords validation to support special characters. Currently, the name field accepts only alphabetical characters and spaces; we plan to extend this to support names containing hyphens, apostrophes, and other common punctuation, such as “O’Connor” and “Smith-Jones.”
 
-2.Extend find to support prefix-based search across additional fields such as student ID, email, and course, instead of names only.
+2. Extend find to support prefix-based search across additional fields such as student ID, email, and course, instead of names only.
 
-3.Add support for multi-value filtering. Currently, each filter prefix accepts only a single value; we plan to extend this to allow multiple values under the same prefix in a single filter command.
+3. Add support for multi-value filtering. Currently, each filter prefix accepts only a single value; we plan to extend this to allow multiple values under the same prefix in a single filter command.
 
-4.Add support for more flexible absence filtering. Currently, absence filtering only supports values greater than or equal to a given threshold; we plan to extend this to support exact values, upper bounds, and ranges.
+4. Add support for more flexible absence filtering. Currently, absence filtering only supports values greater than or equal to a given threshold; we plan to extend this to support exact values, upper bounds, and ranges.
 
-5.Preserve and refresh embedded ViewWindow on edits. Currently, editing a person while their details are shown in the embedded right-hand `ViewWindow` causes the view to be cleared. This breaks UX by losing context. Planned change: when the edited person is the one currently displayed, keep the `ViewWindow` open and update its contents in-place to reflect the edited data. Only clear the view when the person is deleted or removed from the filtered list.
+5. Add confirmation support for `clear`. Currently, `clear` removes all student records immediately after execution. We plan to introduce an optional confirmation workflow similar to `delete`, so that users must explicitly confirm before all records are removed. One possible implementation is to let `LogicManager` temporarily store a pending clear action after a valid `clear` command is entered, and only execute the actual clearing when the user responds with `yes`. Entering `no` or another command would cancel the pending clear action. This would reduce the risk of accidental mass deletion while keeping the command behaviour consistent with other destructive operations.
 
-6.When parsing remarks, only the first `txt/` prefix is treated as the remark delimiter; subsequent `txt/` substrings are treated as part of the remark text.
+6. Add support for multi-remark deletion. Currently, when multiple `r/` prefixes are entered, only the last `r/` prefix is taken; we plan to extend this to allow multiple remark indices to be chosen for deletion under a single `unremark` command.
+
+7. Prevent the cursor from changing at the divider between the person list panel and the view panel. Currently, the cursor may suggest that the divider is draggable, which can create confusion if the UI is intended to remain fixed. We plan to make this interaction clearer by keeping the cursor static at the divider.
