@@ -198,11 +198,8 @@ It must be noted that when entering parameters, they should not be blank.
 
 <box type="warning">
 
-**Warning:**
-
-What makes an entry a duplicate?
-
-* When a student that already exists in TeachAssist is being added (same `STUDENT_ID`, `EMAIL` or `TELEGRAM_USERNAME`),
+**Warning:** What makes an entry a duplicate? <br>
+ When a student that already exists in TeachAssist is being added (same `STUDENT_ID`, `EMAIL` or `TELEGRAM_USERNAME`),
  they must be of a different `COURSE_ID` and `TUTORIAL_GROUP`.
 </box>
 
