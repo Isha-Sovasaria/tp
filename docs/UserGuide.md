@@ -698,6 +698,7 @@ Parameter             | Prefix  | Constraints                                   
 3. Cancelled-week recovery is transient: When a week is cancelled, the app stores previous per-student attendance statuses in memory to allow in-session recovery. However, this transient state is not persisted to disk. As a result, after the application is closed and restarted, recovering the pre-cancellation Y/A/N statuses may not be possible. Consider this when cancelling weeks; if you need to retain historical statuses across restarts, avoid relying on the transient recovery mechanism.
 
 --------------------------------------------------------------------------------------------------------------------
+<div style="page-break-before: always; break-before: page;"></div>
 
 ## FAQ
 
