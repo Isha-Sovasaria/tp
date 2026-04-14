@@ -267,6 +267,7 @@ In the UI, `NOT_SET` is intentionally not rendered as a visible label. This keep
 ### Feature: Mark Attendance Command
 
 #### Overview
+The `marka` command updates a student’s attendance for a specific week. Attendance is represented in the model using `Week` and `WeekList`. Each `Person` stores a `WeekList`, which models attendance across the teaching semester, while each `Week` object captures the attendance status and cancellation state for a single week.
 
 The `marka` command allows tutors to record or update a student’s attendance for a specific week. This feature enables per-week attendance tracking instead of aggregate counts, providing finer control over tutorial participation records.
 The command targets a student by their displayed index in the current person list and applies an attendance status to a specified week.
@@ -314,13 +315,13 @@ After the update, a new `Person` object is created with the modified `WeekList`,
 
 An important implementation detail is that the command does not mutate the original `Person` or `WeekList` directly. Instead, it operates on a copied `WeekList` and replaces the original `Person` in the model. This keeps updates explicit and consistent with the application’s design.
 
+**Copy-on-Write Strategy:**
+To preserve the immutability of `Person` objects, the `WeekList` is duplicated before any update. The command creates a defensive copy of the `WeekList`, applies the attendance update, and constructs a new `Person` instance with the updated list. This prevents unintended side effects and ensures that all references remain consistent.
+
+**Business Rule Enforcement:**
+Validation (e.g., for cancelled weeks) is performed at the command layer before updating the model. This provides immediate feedback and prevents invalid state transitions from reaching the model.
+
 #### Key Behaviours
-
-- **Strict index validation**  
-  Invalid student indices are rejected.
-
-- **Week boundary validation**  
-  Only valid week numbers are accepted.
 
 - **Cancelled week protection**  
   Attendance cannot be modified for cancelled weeks.
@@ -411,9 +412,6 @@ The cancellation is then propagated to all students belonging to the same course
 Finally, the updated cancellation state is persisted to storage.
 
 #### Key Behaviours
-
-- **Strict validation**  
-  Invalid course–tutorial group combinations are rejected, and attempting to cancel an already cancelled week results in an error.
 
 - **Batch update**  
   Cancellation is applied consistently across all students in the same course and tutorial group.
