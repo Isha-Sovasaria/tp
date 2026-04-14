@@ -1173,7 +1173,7 @@ testers are expected to do more *exploratory* testing.
 
     **Test case:** `delete id/A1234567X crs/CS2103T tg/T01`
 
-    **Expected behaviour:** If a student matching the given `StudentId`, `CourseId`, and `TGroup` exists in the entire TeachAssist list, TeachAssist does not delete the student immediately. Instead, it shows a confirmation message asking the user to type `yes` to confirm or `no` to cancel.
+    **Expected behaviour:** If a student matching the given `STUDENT_ID`, `COURSE_ID`, and `TUTORIAL_GROUP` exists in the entire TeachAssist list, TeachAssist does not delete the student immediately. Instead, it shows a confirmation message asking the user to type `yes` to confirm or `no` to cancel.
 
 3. Confirming a deletion
 
