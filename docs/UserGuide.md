@@ -399,8 +399,6 @@ All students in CS2103T, tutorial T12 will show week 5 as cancelled (represented
 
 <img src="images/cancelweeksuccess.png" alt="cancelw success" width="400">
 
-<div style="page-break-before: always; break-before: page;"></div>
-
 
 <a name="uncancel-week"></a>
 #### Uncancelling a tutorial's week: `uncancelw`
