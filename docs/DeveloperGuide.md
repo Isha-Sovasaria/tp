@@ -267,22 +267,9 @@ In the UI, `NOT_SET` is intentionally not rendered as a visible label. This keep
 ### Feature: Mark Attendance Command
 
 #### Overview
+The `marka` command updates a student’s attendance for a specific week. Attendance is represented in the model using `Week` and `WeekList`. Each `Person` stores a `WeekList`, which models attendance across the teaching semester, while each `Week` object captures the attendance status and cancellation state for a single week.
 
-The `marka` command allows tutors to record or update a student’s attendance for a specific week. This feature enables per-week attendance tracking instead of aggregate counts, providing finer control over tutorial participation records.
-
-##### Attendance Fields
-Status: This represents the attendance status of a student.
-- `Y` → Present
-- `A` → Absent
-- `N` → Not marked
-Week Number: This represents the week in a regular NUS semester and ranges from (1 to 13)
-
-##### Command
-The command targets a student by their displayed index in the current person list and applies an attendance status to a specified week. The command word is `marka`, and its expected format is:
-
-`marka INDEX wk/WEEK_NUMBER s/STATUS`
-
-For example, `marka 1 wk/3 s/Y` marks week 3 as attended for the first student in the displayed list.
+This feature is implemented primarily by `MarkAttendanceCommand`. The command retrieves the target student from the currently filtered list, validates the requested update, and replaces the original `Person` in the model with an updated copy containing the modified `WeekList`.
 
 #### Attendance representation
 
@@ -324,13 +311,13 @@ After the update, a new `Person` object is created with the modified `WeekList`,
 
 An important implementation detail is that the command does not mutate the original `Person` or `WeekList` directly. Instead, it operates on a copied `WeekList` and replaces the original `Person` in the model. This keeps updates explicit and consistent with the application’s design.
 
+**Copy-on-Write Strategy:**
+To preserve the immutability of `Person` objects, the `WeekList` is duplicated before any update. The command creates a defensive copy of the `WeekList`, applies the attendance update, and constructs a new `Person` instance with the updated list. This prevents unintended side effects and ensures that all references remain consistent.
+
+**Business Rule Enforcement:**
+Validation (e.g., for cancelled weeks) is performed at the command layer before updating the model. This provides immediate feedback and prevents invalid state transitions from reaching the model.
+
 #### Key Behaviours
-
-- **Strict index validation**  
-  Invalid student indices are rejected.
-
-- **Week boundary validation**  
-  Only valid week numbers are accepted.
 
 - **Cancelled week protection**  
   Attendance cannot be modified for cancelled weeks.
@@ -340,31 +327,6 @@ An important implementation detail is that the command does not mutate the origi
 
 - **Immutability**  
   Updates are performed on copies, and the modified student replaces the original in the model.
-
-#### Implementation Details
-**Copy-on-Write Strategy:**
-To preserve the immutability of `Person` objects, the `WeekList` is duplicated before any update. The command creates a defensive copy of the `WeekList`, applies the attendance update, and constructs a new `Person` instance with the updated list. This prevents unintended side effects and ensures that all references remain consistent.
-
-**Business Rule Enforcement:**
-Validation (e.g., for cancelled weeks) is performed at the command layer before updating the model. This provides immediate feedback and prevents invalid state transitions from reaching the model.
-
-#### Design Logic
-**Pros:**
-- Immutability of `Person` objects prevents shared-state bugs.
-- Defensive copying ensures thread safety and predictable UI updates.
-- Validation at the command layer improves transparency and debuggability.
-
-**Cons:**
-- Slight performance overhead due to object copying.
-- Some duplication of validation logic between command and model layers.
-
-**Scalability:**
-The copy-on-write approach is robust for moderate data sizes and aligns with functional programming best practices.
-
-**Aspect: Responsibility separation**
-* **Command:** Handles semantic validation and business rules
-* **Model:** Performs state updates only after validation
-* This separation ensures clear layering and maintainability of the system.
 
 #### Sequence diagram
 
@@ -380,12 +342,6 @@ The `cancelw` command allows a teaching assistant to mark a specific week as can
 A cancelled week has the following properties:
 - It cannot be marked for attendance
 - It is excluded from attendance-related calculations
-
-The command word is `cancelw`, and its expected format is:
-
-`cancelw crs/COURSE_ID tg/TUTORIAL_GROUP wk/WEEK_NUMBER`
-
-For example, `cancelw crs/CS2103T tg/T01 wk/5` marks week 5 as cancelled for all students in course CS2103T and tutorial group T01.
 
 #### Cancellation representation
 
@@ -428,9 +384,6 @@ Finally, the updated cancellation state is persisted to the address book.
 
 #### Key Behaviours
 
-- **Strict validation**  
-  Invalid course–tutorial group combinations are rejected, and attempting to cancel an already cancelled week results in an error.
-
 - **Batch update**  
   Cancellation is applied consistently across all students in the same course and tutorial group.
 
@@ -464,11 +417,6 @@ The `uncancelw` command allows a teaching assistant to reverse a previously canc
 After uncancelling:
 - The week becomes available for attendance marking
 - The previously stored attendance status is restored (within the same session)
-
-**Format:**
-uncancelw crs/COURSE_ID tg/TUTORIAL_GROUP wk/WEEK_NUMBER
-
-For example, `uncancelw crs/CS2103T tg/T01 wk/5` restores week 5 for all students in course CS2103T and tutorial group T01.
 
 #### Cancellation reversal representation
 
