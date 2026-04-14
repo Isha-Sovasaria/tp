@@ -153,7 +153,7 @@ The `Model` component,
 
 <box type="info" seamless>
 
-**Note:** Unlike the original AB3 model, TeachAssist uses student-specific fields and records instead of tag-based contact classification. Each `Person` stores student-related fields such as `Name`, `CourseId`, `Email`, `StudentId`, `TGroup`, `Tele`, `WeekList`, `Progress`, and a list of `Remark` objects.
+**Note:** TeachAssist uses structured student fields and records instead of free-form tags (e.g., 'friend', 'lab partner') to classify contacts. This lets us store and query student-specific data such as CourseId, StudentId, weekly attendance, progress and remarks. Each `Person` stores student-related fields such as `Name`, `CourseId`, `Email`, `StudentId`, `TGroup`, `Tele`, `WeekList`, `Progress`, and a list of `Remark` objects.
 
 <puml src="diagrams/BetterModelClassDiagram.puml" width="600" />
 
@@ -240,7 +240,8 @@ The `delete` feature is implemented as a two-stage confirmation workflow to prev
    - If the next command is `yes`, `LogicManager` executes the stored `ConfirmedDeleteCommand` via `execute(Model)`, which calls `Model#deletePerson(Person)`.
    - If the next command is anything else, the pending command is cleared and the new command is processed; no deletion occurs.
 4. **State Management:**
-   - The pending confirmation is transient and only valid for the immediate next command. This is enforced by `LogicManager`, which clears the pending command on any non-`yes`/`no` input.
+   - The pending confirmation is transient and only valid for the immediate next command. This is enforced by `LogicManager`, which clears the pending command on any non-`yes`/`no` input and ensures that only one pending command can exist at a time.
+   - Pending state is not persisted; lost on restart.
 
 **Key Classes and Methods:**
 - `DeleteCommand#getConfirmedCommand(Model)`
@@ -248,43 +249,20 @@ The `delete` feature is implemented as a two-stage confirmation workflow to prev
 - `LogicManager` (pending command storage and routing)
 - `ConfirmedDeleteCommand#execute(Model)`
 
-**Relevant diagram:** Delete confirmation workflow.
+**The diagram below illustrates the delete command and confirmation check workflow:** Delete confirmation workflow.
 <puml src="diagrams/DeleteConfirmationActivityDiagram.puml" width="600" />
-
-
-#### Design Logic
-**Two-Stage Workflow:**
-This design decouples command parsing from execution, reducing the risk of accidental destructive actions. Pending state is managed in `LogicManager`, not the model, ensuring that only one destructive action can be pending at a time.
-
-**Pros:**
-- Strong safety against accidental deletion (immutability of model until explicit confirmation).
-- Low coupling between command parsing and execution.
-- Defensive clearing of pending state on unrelated commands.
-
-**Cons:**
-- Slightly increased complexity in `LogicManager`.
-- Pending state is not persisted; lost on restart.
-
-**Scalability:**
-The pattern can be extended to other destructive commands (e.g., `clear`) with minimal changes.
 
 ### Feature: Update Progress
 
-
 #### Technical Overview
-The `updateprogress` command updates a student's progress status, which is represented by the `Progress` enum in the model. The enum values are:
-- `ON_TRACK`
-- `NEEDS_ATTENTION`
-- `AT_RISK`
-- `NOT_SET` (default)
+The `updateprogress` command updates a student's progress status, which is represented in the model using the `Progress` enum. The supported values are `ON_TRACK`, `NEEDS_ATTENTION`, `AT_RISK`, and `NOT_SET`, where `NOT_SET` is the default value indicating that no explicit progress status has been assigned.
 
-#### Implementation Details
-The `Progress` enum enforces valid states and prevents inconsistent or invalid progress values. The `NOT_SET` state is used as a sentinel value to indicate the absence of an explicit status. The UI layer maps each enum value to a color for display; when the value is `NOT_SET`, no label is rendered, keeping the UI uncluttered.
+The command ensures that only valid progress values can be stored, preventing inconsistent or malformed states in the model. This allows progress to be handled in a structured and type-safe way throughout the application.
 
-#### Design Logic
+#### Design Considerations
+The use of an enum centralizes the set of valid progress states and makes the model easier to validate and maintain. The `NOT_SET` value serves as a sentinel state in the model, representing the absence of an assigned progress status without requiring null handling or special-case logic elsewhere.
 
-**NOT_SET State:**
-The `NOT_SET` state is not shown in the UI, reducing visual clutter. This separation of model and UI logic allows the model to remain expressive while the UI remains clean.
+In the UI, `NOT_SET` is intentionally not rendered as a visible label. This keeps the interface uncluttered while allowing the model to remain expressive. This separation of concerns ensures that the model captures the full state of a student’s progress, while the UI decides how much of that state should be shown to the user.
 
 ### Feature: Mark Attendance Command
 
@@ -598,54 +576,53 @@ After every command, `MainWindow#updateViewWindowAfterCommand()` ensures the vie
 3. If found, refresh the panel with the updated person; if not, clear the panel and selection.
 
 
-### \[Proposed\] Batch Attendance Marking
+### [Proposed] Batch Attendance Marking
 
 #### Motivation
 
-Currently, the `marka` command marks attendance for a single student at a time. In practice, TAs typically mark attendance for an entire tutorial group in one sitting. For a class of 20+ students this requires 20+ individual `marka` commands — slow and error-prone. A batch marking command would allow TAs to mark all students in a course–tutorial group for a given week in a single command.
+Currently, the `marka` command records attendance for only one student at a time. In practice, tutors often mark attendance for an entire tutorial group in one sitting. For larger classes, this requires many repeated `marka` commands, which is inefficient and increases the likelihood of input errors. A batch attendance command would allow attendance for all students in a course–tutorial group to be recorded in a single command.
 
 #### Proposed command format
 
-`markall crs/COURSE_ID tg/TUTORIAL_GROUP week/WEEK_NUMBER sta/STATUS`
+`markall crs/COURSE_ID tg/TUTORIAL_GROUP wk/WEEK_NUMBER s/STATUS`
 
-Example: `markall crs/CS2103T tg/T01 week/3 sta/Y` marks week 3 as attended for every student in CS2103T T01.
+Example: `markall crs/CS2103T tg/T01 wk/3 s/Y` marks week 3 as attended for every student in CS2103T T01.
 
 #### Proposed implementation
 
 The feature would introduce two new classes: `MarkAllCommand` and `MarkAllCommandParser`.
 
-**Parsing phase:**
-`MarkAllCommandParser` validates that all four prefixes (`crs/`, `tg/`, `week/`, `sta/`) are present and parses their values into a `CourseId`, `TGroup`, week `Index`, and `Week.Status`.
+**Parsing phase:**  
+`MarkAllCommandParser` validates that all required prefixes (`crs/`, `tg/`, `wk/`, `s/`) are present and parses them into a `CourseId`, `TGroup`, week number, and `Week.Status`.
 
-**Execution phase:**
-`MarkAllCommand#execute(Model)` proceeds as follows:
+**Execution phase:**  
+`MarkAllCommand#execute(Model)` would proceed as follows:
 
-1. Retrieve the full person list from the model.
-2. Filter to students matching the given `CourseId` and `TGroup`.
+1. Retrieve the full student list from the model.
+2. Filter the list to students matching the specified `CourseId` and `TGroup`.
 3. If no students match, throw a `CommandException`.
 4. For each matching student:
-   a. Copy the student's `WeekList`.
-   b. Check the target week's status. If the week is **cancelled**, skip this student and add them to a skipped list.
-   c. Otherwise, mark the week with the given status and replace the student in the model via `Model#setPerson`.
-5. Return a `CommandResult` summarising how many students were marked and how many were skipped due to cancellation.
+   a. Create a defensive copy of the student's `WeekList`.  
+   b. Check whether the target week is cancelled. If so, skip that student and record the skip for reporting.  
+   c. Otherwise, update the week with the given attendance status and replace the student in the model using `Model#setPerson`.
+5. Return a `CommandResult` summarising how many students were updated and how many were skipped.
 
-This is a **partial-success** design: students with cancelled weeks are skipped rather than causing the entire command to fail. This is preferable in a batch context because a single cancelled week (e.g. from a makeup tutorial) should not block the TA from marking the rest of the class.
+This design adopts partial-success semantics: students whose target week is cancelled are skipped, while valid updates are still applied to the rest of the group. This is preferable to an all-or-nothing approach, because a single cancelled record should not prevent attendance from being recorded for the remaining students. The command result would provide clear feedback on the outcome of the operation, including any skipped records.
 
 
-
-### \[Proposed\] Undo / Redo
+### [Proposed] Undo / Redo
 
 #### Motivation
 
-Currently, TeachAssist has no way to reverse a command after execution. A TA who accidentally deletes the wrong student, overwrites attendance, or edits the wrong field must manually re-enter the correct data. An undo/redo mechanism would let users recover from mistakes instantly.
+Currently, TeachAssist does not provide a way to reverse commands after they have been executed. When a user accidentally deletes the wrong student, edits the wrong field, or overwrites attendance, recovery requires manual correction. An undo/redo mechanism would allow users to recover from such mistakes more quickly and safely.
 
 #### Proposed implementation
 
-The feature centres on a `VersionedAddressBook` that extends `AddressBook` with an internal state history list and a `currentStatePointer`. Each mutating command (e.g., `add`, `edit`, `delete`, `marka`) calls `Model#commitAddressBook()` after execution, which saves a copy of the current address book state to the history.
+This feature would be based on a `VersionedAddressBook` that extends `AddressBook` with a state history and a `currentStatePointer`. After each mutating command (e.g. `add`, `edit`, `delete`, `marka`) is successfully executed, `Model#commitAddressBook()` would be called to save a snapshot of the current address book state.
 
-- `UndoCommand` calls `Model#undoAddressBook()`, which decrements the pointer and restores the previous state.
-- `RedoCommand` calls `Model#redoAddressBook()`, which increments the pointer and restores the next state.
-- If a new mutating command is executed after an undo, all forward states beyond the pointer are discarded.
+- `UndoCommand` would call `Model#undoAddressBook()`, which moves the pointer to the previous state and restores it.
+- `RedoCommand` would call `Model#redoAddressBook()`, which moves the pointer to the next state and restores it.
+- If a new mutating command is executed after an undo operation, all states ahead of the current pointer would be discarded, ensuring that redo history remains consistent with the latest execution path.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -678,36 +655,36 @@ TeachAssist consolidates student data, attendance, progress tracking, and consul
 
 ### User stories
 
-Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
+Priorities: High (must have) - `* * *`, Medium (nice to have/Should have) - `* *`, Low (could have) - `*`
 
-| Priority | As a … | I want to … | So that I can… |
-|----------|--------|-------------|---------------|
-| `**` | new user | see a welcome message on first launch | know how to get started |
-| `**` | new user | open a help window listing all available commands | learn how to use the system |
-| `**` | new user | view preloaded sample student data | understand how student records are structured |
-| `**` | new user | clear all sample data | start using TeachAssist with my own student records |
-| `***` | TA | add a student with fields such as `NAME`, `STUDENT_ID`, `COURSE_ID`, `TUTORIAL_GROUP`, `EMAIL`, and `TELEGRAM_USERNAME` | maintain complete and structured student records |
-| `***` | TA | edit a student’s details | keep student records accurate and up to date |
-| `***` | TA | list all students | get an overview of all the students I am managing |
-| `**` | TA | find students by name keywords | quickly locate a student when I do not remember their full details |
-| `**` | TA managing multiple classes | filter or narrow down the displayed student list | focus on the relevant group of students more quickly |
-| `***` | TA | delete a student by index | quickly remove an incorrect or outdated student record |
-| `***` | TA | delete a student by `STUDENT_ID`, `COURSE_ID`, and `TUTORIAL_GROUP` | remove a specific student without relying on the displayed index |
-| `***` | careful TA | be asked to confirm before deleting a student | avoid accidentally deleting the wrong student record |
-| `**` | TA managing multiple classes | distinguish students by course ID and tutorial group as well as name | avoid confusion between students from different classes or with similar names |
-| `**` | careful TA | be prevented from adding duplicate student records | maintain clean and consistent data |
-| `**` | careful TA | receive clear error messages when a command format is invalid | correct mistakes quickly |
-| `***` | TA tracking student performance | update a student’s progress status | quickly identify which students are on track or need support |
-| `**` | TA preparing for class | view a student’s progress status in the UI | understand the student’s standing at a glance |
-| `***` | TA taking tutorial attendance | mark attendance for a student | keep a record of who attended class |
-| `***` | TA managing a tutorial group | cancel a tutorial week for a class | reflect weeks where no tutorial was conducted |
-| `**` | TA managing a tutorial group | restore a previously cancelled tutorial week | correct mistaken cancellations or resume normal attendance tracking |
-| `***` | TA managing multiple students | add remarks to a student’s record | keep track of important observations, follow-up actions, and teaching-related context |
-| `***` | TA managing multiple students | delete a remark from a student’s record | remove outdated, incorrect, or no longer relevant remarks |
-| `***` | TA managing multiple students | view a student’s full details and remarks | quickly review the student’s record before teaching or follow-up |
-| `**` | TA managing many students | keep remarks together with each student record | avoid scattering notes across separate apps or documents |
-| `**` | TA managing multiple tutorial groups | keep all students across different courses and tutorial groups in one application | avoid maintaining multiple spreadsheets or lists |
-| `**` | TA | return to the full student list after using find or filter | continue working with all students again |
+| Priority | As a … | I want to …                                                                                                                    | So that                                                                               |
+|-----|--------|--------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `**` | new user | see a welcome message on first launch                                                                                          | I know how to get started                                                             |
+| `**` | new user | open a help window listing all available commands                                                                              | I understand how to use the system                                                    |
+| `**` | new user | view preloaded sample student data                                                                                             | I can understand how student records are structured                                   |
+| `**` | new user | clear all sample data                                                                                                          | I can start using TeachAssist with my own student records                             |
+| `***` | TA | add  students into the system                                                                                                  | I can maintain a record of all students I teach.                                      |
+| `**` | TA | edit a student’s details                                                                                                       | I can correct mistakes or update information when needed                              |
+| `***` | TA | list all students                                                                                                              | I can see an overview of all the student records currently in the system.             |
+| `***` | TA | search for a student by using the start of any word in their name                                                              | I can quickly locate a student when I do not remember their full details              |
+| `**` | TA managing multiple classes | filter or narrow down the displayed student list to a particular course , tutorial group , number or absences or progress tags | I can focus on the relevant group of students                                         |
+| `***` | TA | delete a student by index                                                                                                      | I can quickly remove an incorrect or outdated student record                          |
+| `**` | TA | delete a student by using their full details like `STUDENT_ID`, `COURSE_ID`, and `TUTORIAL_GROUP`                              | I canremove a specific student without relying on the displayed index                 |
+| `*` | careful TA | be asked to confirm before deleting a student                                                                                  | I can avoid accidentally deleting the wrong student record                            |
+| `**` | careful TA | be prevented from adding duplicate student records                                                                             | I can maintain clean and consistent data                                              |
+| `*` | TA tracking student performance | update a student’s progress status                                                                                             | I can quickly identify which students are on track or need support                    |
+| `**` | TA taking tutorial attendance | mark attendance for a student                                                                                                  | keep a record of who attended class                                                   |
+| `***` | TA managing a tutorial group | cancel a tutorial week for a class                                                                                             | reflect weeks where no tutorial was conducted                                         |
+| `**` | TA managing a tutorial group | restore a previously cancelled tutorial week                                                                                   | correct mistaken cancellations or resume normal attendance tracking                   |
+| `*` | TA managing multiple students | add remarks/notes to a student’s record                                                                                        | keep track of important observations, follow-up actions, and teaching-related context |
+| `*` | TA managing multiple students | delete a particular remark from a student’s record                                                                             | remove outdated, incorrect, or no longer relevant remarks                             |
+| `*` | TA managing multiple students | view a student’s full details and  previous remarks                                                                            | quickly review the student’s record before teaching or follow-up                      |
+| `***` | TA | return to the full student list after using find or filter                                                                     | I can continue working with all students again                                        |
+| `**` | TA managing multiple students | filter students by progress status                                                                                             | I can focus on those who need immediate attention                                     |
+| `*` | TA | Copy High risk student email addresses to clipboard                                                                            | To make it easier to follow up with students who may be struggling                    |
+| `*` | TA  | add a consultation date for a particular student                                                                               | I can keep track of the consults I have scheduled and ensure no time conflict         |
+| `*` | TA | archive completed courses                                                                                                      | past semester data remains accessible but does not clutter my active workspace        |
+
 
 
 ### Use cases
