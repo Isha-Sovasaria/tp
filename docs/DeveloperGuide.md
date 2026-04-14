@@ -1121,7 +1121,7 @@ testers are expected to do more *exploratory* testing.
 
     **Test case:** `delete id/A1234567X crs/CS2103T tg/T01`
 
-    **Expected behaviour:** If a student matching the given `StudentId`, `CourseId`, and `TGroup` exists in the entire TeachAssist list, TeachAssist does not delete the student immediately. Instead, it shows a confirmation message asking the user to type `yes` to confirm or `no` to cancel.
+    **Expected behaviour:** If a student matching the given `STUDENT_ID`, `COURSE_ID`, and `TUTORIAL_GROUP` exists in the entire TeachAssist list, TeachAssist does not delete the student immediately. Instead, it shows a confirmation message asking the user to type `yes` to confirm or `no` to cancel.
 
 3. Confirming a deletion
 
@@ -1181,9 +1181,9 @@ testers are expected to do more *exploratory* testing.
 
     **Expected behaviour:** If index `999` is outside the bounds of the current filtered list, the command is rejected, no student record is updated, and an error message is shown: `"The student index provided is invalid"`.
 
-4. Removing progress using `clear` or `not_set`
+4. Removing progress using `not_set`
 
-    **Test case:** `updateprogress 1 p/clear` (or equivalently `updateprogress 1 p/not_set`)
+    **Test case:** `updateprogress 1 p/not_set`
 
     **Expected behaviour:** If index `1` refers to a valid student in the current filtered list, the student's progress is reset to `NOT_SET`. The progress tag is removed from the student card in the UI, and a success message is shown: `"Cleared progress for student: <student details>"`.
 
