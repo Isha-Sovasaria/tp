@@ -12,26 +12,14 @@ Class MainWindow
 Class HelpWindow
 Class ResultDisplay
 Class PersonListPanel
-Class ViewWindow {
-    - person : Person
-}
-Class PersonCard {
-    - person : Person
-    - weekAttendance : FlowPane
-
-    + PersonCard(person : Person, displayedIndex : int)
-
-    - renderWeekAttendance(flowPane : FlowPane, weekList : WeekList)
-}
+Class PersonCard
 Class StatusBarFooter
 Class CommandBox
+Class ViewWindow
 }
 
 package Model <<Rectangle>> {
-Class HiddenModel #FFFFFF
-Class WeekList
 Class Person
-Class Remark
 }
 
 package Logic <<Rectangle>> {
@@ -48,12 +36,12 @@ MainWindow *-down-> "1" ResultDisplay
 MainWindow *-down-> "1" PersonListPanel
 MainWindow *-down-> "1" StatusBarFooter
 MainWindow --> "0..1" HelpWindow
-MainWindow --> "0..1" ViewWindow
+MainWindow *-down-> "1" ViewWindow
 
 PersonListPanel -down-> "*" PersonCard
 
 MainWindow -left-|> UiPart
-
+ViewWindow --|> UiPart
 ResultDisplay --|> UiPart
 CommandBox --|> UiPart
 PersonListPanel --|> UiPart
@@ -61,11 +49,10 @@ PersonCard --|> UiPart
 StatusBarFooter --|> UiPart
 HelpWindow --|> UiPart
 
-ViewWindow --|> UiPart
 ViewWindow -down-> Person
-ViewWindow ..down-> Remark
+PersonCard --> Person
 
-PersonCard ..> Model
+
 UiManager -right-> Logic
 MainWindow -left-> Logic
 

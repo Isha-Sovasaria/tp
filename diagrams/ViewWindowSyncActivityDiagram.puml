@@ -1,0 +1,27 @@
+@startuml
+!include style.puml
+title View Window Auto-Sync Logic
+
+start
+
+if (ViewWindow is visible?) then ([yes])
+    :Search filtered person list for the
+    person currently displayed in ViewWindow
+    (using isSamePerson matching);
+
+    if (Person still in list?) then ([yes])
+        :Refresh ViewWindow with updated Person object;
+        :Re-select person in list;
+    else ([no])
+        :Clear ViewWindow content;
+        :Remove ViewWindow from display;
+        :Clear selection from person list;
+    endif
+else ([no])
+    ' Do nothing
+endif
+
+stop
+
+@enduml
+
